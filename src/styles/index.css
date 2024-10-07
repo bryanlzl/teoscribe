@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'noto-sans';
+  src: url('/fonts/NotoSans.ttf') format('truetype');
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
