@@ -6,7 +6,7 @@ const useLangConversionStore = create<ILangConversionStore>((set) => ({
   conversionSettings: {
     mode: 'transcription',
     sourceLanguage: 'Teochew',
-    targetLanguage: 'English',
+    targetLanguage: 'Chinese',
     inputFormat: 'spoken',
     outputFormat: 'text',
   },
