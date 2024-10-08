@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import ToggleTheme from './components/toggleTheme';
+import useTheme from './stores/useTheme';
 
 const App = (): JSX.Element => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme] = useTheme();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -23,7 +24,7 @@ const App = (): JSX.Element => {
             <p>app for dialect learning!</p>
           </span>
         </span>
-        <ToggleTheme setTheme={setTheme} theme={theme} />
+        <ToggleTheme />
       </div>
     </div>
   );

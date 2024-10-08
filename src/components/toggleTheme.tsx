@@ -1,18 +1,15 @@
-interface IToggleThemeProps {
-  setTheme: React.Dispatch<React.SetStateAction<'light' | 'dark'>>;
-  theme: 'light' | 'dark';
-}
+import useTheme from '../stores/useTheme';
 
-const ToggleTheme = ({ setTheme, theme }: IToggleThemeProps): JSX.Element => {
-  const isDarkMode = theme === 'dark';
+const ToggleTheme = (): JSX.Element => {
+  const [theme, setTheme] = useTheme();
 
   return (
     <label className="swap swap-rotate w-fit h-fit my-[1rem] mx-[1.5rem]">
       <input
         type="checkbox"
         className="theme-controller"
-        checked={isDarkMode}
-        onChange={() => setTheme(isDarkMode ? 'light' : 'dark')}
+        checked={theme === 'dark'}
+        onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       />
 
       <svg
