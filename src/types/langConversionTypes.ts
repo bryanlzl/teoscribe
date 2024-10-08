@@ -6,6 +6,6 @@ export interface ILangConversionSettings {
   outputFormat: string;
 }
 
-export interface ITranslationLibrary {
-  [language: string]: string[];
+export interface ILangConversionLibrary {
+  [sourceLanguage: string]: { [targetLanguage: string]: string[] };
 }

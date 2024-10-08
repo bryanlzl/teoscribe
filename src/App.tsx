@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import ToggleTheme from './components/toggleTheme';
 import useTheme from './stores/useTheme';
+import LayoutHeader from './components/layoutHeader';
+import LayoutContent from './components/layoutContent';
 
 const App = (): JSX.Element => {
   const [theme] = useTheme();
@@ -15,17 +16,12 @@ const App = (): JSX.Element => {
   }, [theme]);
 
   return (
-    <div data-theme={theme} className="flex flex-col justify-center items-center bg-base-100 text-base-content">
-      <div className="flex flex-row justify-between self-start w-[100vw] h-[100vh]">
-        <span className="my-[1rem] mx-[1.5rem] rounded-md h-fit">
-          <h1 className="text-xl h-fit font-semibold">Dialectal</h1>
-          <span className="flex flex-row justify-start text-xs">
-            <p className="underline">The </p>&nbsp;
-            <p>app for dialect learning!</p>
-          </span>
-        </span>
-        <ToggleTheme />
-      </div>
+    <div
+      data-theme={theme}
+      className="flex flex-col justify-center items-center h-[100vh] bg-base-100 text-base-content"
+    >
+      <LayoutHeader />
+      <LayoutContent />
     </div>
   );
 };
