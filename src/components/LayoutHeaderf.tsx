@@ -1,4 +1,4 @@
-import ToggleTheme from './toggleTheme';
+import ToggleTheme from './ToggleTheme';
 
 const LayoutHeader = (): JSX.Element => {
   return (
