@@ -3,10 +3,10 @@ import useTheme from './stores/useTheme';
 import LayoutContent from './components/LayoutContent';
 import LayoutHeader from './components/LayoutHeader';
 // import LayoutFooter from './components/LayoutFooter';
-import SlidingUpPanel from './components/SlideUpPanel';
+import ResultPanel from './components/ResultPanel';
 
 const App = (): JSX.Element => {
-  const [theme] = useTheme();
+  const { theme } = useTheme();
   const [isShownSlidingPanel, setIsShownSlidingPanel] = useState<boolean>(false);
 
   useEffect(() => {
@@ -21,11 +21,12 @@ const App = (): JSX.Element => {
   return (
     <div
       data-theme={theme}
-      className="flex flex-col justify-center items-center h-[100vh] bg-base-100 text-base-content relative"
+      className="relative flex flex-col justify-center items-center h-[100vh] bg-base-100 text-base-content"
     >
       <LayoutHeader />
       <LayoutContent />
       {/* <LayoutFooter /> */}
+
       {/* Sliding content */}
       <button
         onClick={() => {
@@ -34,9 +35,7 @@ const App = (): JSX.Element => {
       >
         Enable sliding panel
       </button>
-      <SlidingUpPanel height={80} isEnabled={isShownSlidingPanel} setIsEnabled={setIsShownSlidingPanel}>
-        <div>Hello this will work</div>
-      </SlidingUpPanel>
+      <ResultPanel isShownSlidingPanel={isShownSlidingPanel} setIsShownSlidingPanel={setIsShownSlidingPanel} />
     </div>
   );
 };

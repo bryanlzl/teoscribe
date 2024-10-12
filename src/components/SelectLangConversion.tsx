@@ -4,7 +4,7 @@ import { TRANSLATION_LIBRARY } from '../definitions/conversionDict';
 import useLangConversion from '../stores/useLangConversion';
 
 const SelectLangConversion = (): JSX.Element => {
-  const [conversionSettings, setConversionSettings] = useLangConversion();
+  const { conversionSettings, setConversionSettings } = useLangConversion();
 
   const handleTargetLangSelection = (event: ChangeEvent<HTMLSelectElement>): void => {
     setConversionSettings({ ...conversionSettings, targetLanguage: event.target.value });
@@ -15,12 +15,12 @@ const SelectLangConversion = (): JSX.Element => {
   };
 
   return (
-    <div className="flex flex-col space-y-[1rem] mt-[8vh]">
+    <div className="flex flex-col mt-[8vh] space-y-[1rem]">
       {/* Source Language Selection */}
-      <span className="flex flex-row space-x-[0.75rem] items-center">
+      <span className="flex flex-row items-center space-x-[0.75rem]">
         <MicrophoneIcon className="h-[1.2rem] w-auto text-base-content" />
         <select
-          className="select select-md text-[0.9rem] w-[14rem] bg-secondary"
+          className="select select-md w-[14rem] text-[0.9rem] bg-secondary"
           onChange={handleSourceLangSelection}
           value={conversionSettings.sourceLanguage || ''}
           disabled={true}
@@ -36,14 +36,13 @@ const SelectLangConversion = (): JSX.Element => {
         </select>
       </span>
       {/* Target Language Selection */}
-      <span className="flex flex-row space-x-[0.75rem] items-center">
+      <span className="flex flex-row items-center space-x-[0.75rem]">
         <LanguageIcon className="h-[1.2rem] w-auto text-base-content" />
         <select
-          className="select select-md text-[0.9rem] w-[14rem] bg-secondary"
+          className="select select-md w-[14rem] text-[0.9rem] bg-secondary"
           onChange={handleTargetLangSelection}
           value={conversionSettings.targetLanguage || ''}
           disabled={true}
-          // disabled={!conversionSettings.sourceLanguage}
         >
           <option value="" disabled>
             Select Target Language

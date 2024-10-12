@@ -1,28 +1,51 @@
-import React, { FC, Dispatch, SetStateAction } from 'react';
+import React, { FC, Dispatch, SetStateAction, useState } from 'react';
+import { ArrowDownIcon } from '@heroicons/react/24/outline';
 
 interface ISlidingUpPanelProps {
   children: React.ReactNode;
-  height: number;
+  offsetHeight: number;
   isEnabled: boolean;
   setIsEnabled: Dispatch<SetStateAction<boolean>>;
 }
 
-const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({ children, height, isEnabled, setIsEnabled }) => {
+const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({ children, offsetHeight, isEnabled, setIsEnabled }) => {
+  const [chevronIconRotate, setChevronIconRotate] = useState<string>('rotate-0');
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div
-      className={`absolute bottom-0 transition-max-height duration-500 ease-in-out overflow-hidden w-full bg-gray-700 text-center ${
-        isEnabled ? `h-[${height}vh] py-4` : 'h-0'
-      }`}
+      style={{
+        height: isEnabled ? `calc(100vh - ${offsetHeight}rem)` : '0',
+        boxShadow: '0 -0.5rem 1rem rgba(0, 0, 0, 0.15)',
+      }}
+      className="absolute bottom-0 w-full bg-secondary text-center transition-all duration-500 ease-in-out overflow-hidden"
     >
-      <div>
-        <button
-          className="btn btn-primary"
-          onClick={() => {
-            setIsEnabled(false);
-          }}
-        >
-          close panel
-        </button>
+      <button
+        className="btn btn-xs w-[100%] h-[2.5rem] bg-secondary hover:bg-transparent border-none shadow-none no-animation rounded-none"
+        onClick={() => {
+          setIsEnabled(!isEnabled);
+        }}
+        onMouseEnter={() => {
+          setChevronIconRotate('rotate-0');
+          setIsHovered(true);
+        }}
+        onMouseLeave={() => {
+          setChevronIconRotate('rotate-180');
+          setIsHovered(false);
+        }}
+      >
+        <ArrowDownIcon
+          className={`h-[1.2rem] transition-transform duration-500 ${
+            isHovered ? 'animate-float-up-down' : ''
+          } ${chevronIconRotate}`}
+        />
+      </button>
+
+      <div
+        className={`${!isEnabled ? 'hidden' : ''} transition-opacity duration-500 ${
+          isHovered ? 'opacity-50' : 'opacity-100'
+        }`}
+      >
         {children}
       </div>
     </div>

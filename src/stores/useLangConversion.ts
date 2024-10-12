@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ILangConversionStore, TLangConversionHook } from '../types/storeTypes';
+import { ILangConversionStore } from '../types/storeTypes';
 import { ILangConversionSettings } from '../types/langConversionTypes';
 
 const useLangConversionStore = create<ILangConversionStore>((set) => ({
@@ -7,16 +7,16 @@ const useLangConversionStore = create<ILangConversionStore>((set) => ({
     mode: 'transcription',
     sourceLanguage: 'Teochew',
     targetLanguage: 'Chinese',
-    inputFormat: 'spoken',
+    inputFormat: 'audio',
     outputFormat: 'text',
   },
   setConversionSettings: (conversionSettings: ILangConversionSettings) => set({ conversionSettings }),
 }));
 
-const useLangConversion = (): TLangConversionHook => {
+const useLangConversion = (): ILangConversionStore => {
   const conversionSettings = useLangConversionStore((state) => state.conversionSettings);
   const setConversionSettings = useLangConversionStore((state) => state.setConversionSettings);
-  return [conversionSettings, setConversionSettings];
+  return { conversionSettings, setConversionSettings };
 };
 
 export default useLangConversion;

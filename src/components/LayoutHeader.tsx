@@ -4,7 +4,7 @@ const LayoutHeader = (): JSX.Element => {
   return (
     <div className="flex flex-row justify-between self-start w-[100vw] h-[4.5rem]">
       <span className="my-[1rem] mx-[1.5rem] rounded-md h-fit">
-        <h1 className="text-xl h-fit font-semibold">TeoSCRIBE</h1>
+        <h1 className="text-xl font-semibold h-fit">TeoSCRIBE</h1>
         <span className="flex flex-row justify-start text-xs">
           <p className="underline">The </p>&nbsp;
           <p>app for Teochew learning!</p>

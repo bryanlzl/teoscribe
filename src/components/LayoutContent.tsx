@@ -1,11 +1,16 @@
 import SelectLangConversion from './SelectLangConversion';
-import ButtonCircularRecord from './ButtonCircularRecord';
+import { MicrophoneIcon } from '@heroicons/react/24/solid';
 
 const LayoutContent = (): JSX.Element => {
   return (
     <div className="flex flex-col justify-center items-center w-[100%] h-[100%]">
       <SelectLangConversion />
-      <ButtonCircularRecord />
+      <div className="flex flex-col justify-center items-center w-fit h-[100%] space-y-[1.5rem]">
+        <h2 className="text-center opacity-75">Tap to speak</h2>
+        <button className="btn btn-circle w-[15.5rem] h-[15.5rem] bg-primary">
+          <MicrophoneIcon className="w-[50%] h-auto text-accent" />
+        </button>
+      </div>
     </div>
   );
 };

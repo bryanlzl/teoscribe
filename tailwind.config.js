@@ -11,6 +11,15 @@ export default {
         xl: '1280px',
       },
       fontFamily: { sans: ['noto-sans', 'sans-serif'] },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(0.75rem)' },
+        },
+      },
+      animation: {
+        'float-up-down': 'float 1.5s ease-in-out infinite',
+      },
     },
   },
   plugins: [require('daisyui')],
@@ -20,7 +29,8 @@ export default {
         // Custom light theme
         light: {
           primary: '#E2F1E7',
-          secondary: '#387478',
+          secondary: '#94d3c1',
+          secondaryDark: '#75b3a4',
           accent: '#8AB396',
           neutral: '#F7FAF9',
           'base-100': '#FFFFFF',
@@ -28,17 +38,18 @@ export default {
           success: '#36D399',
           warning: '#FBBD23',
           error: '#F87272',
-          font: '#2E3D3B',
+          font: '#3D5453',
         },
       },
       {
         // Custom dark theme
         dark: {
-          primary: '#629584',
-          secondary: '#243642',
+          primary: '#4E7C6A',
+          secondary: '#334E5E',
+          secondaryDark: '#243642',
           accent: '#88B0A3',
           neutral: '#393939',
-          'base-100': '#1B2624',
+          'base-100': '#304341',
           info: '#3ABFF8',
           success: '#36D399',
           warning: '#FBBD23',

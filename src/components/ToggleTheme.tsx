@@ -1,7 +1,7 @@
 import useTheme from '../stores/useTheme';
 
 const ToggleTheme = (): JSX.Element => {
-  const [theme, setTheme] = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
     <label className="swap swap-rotate w-fit h-fit my-[1rem] mx-[1.5rem]">
