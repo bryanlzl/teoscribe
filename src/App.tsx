@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import useTheme from './stores/useTheme';
 import LayoutContent from './components/LayoutContent';
 import LayoutHeader from './components/LayoutHeader';
@@ -7,7 +7,6 @@ import ResultPanel from './components/ResultPanel';
 
 const App = (): JSX.Element => {
   const { theme } = useTheme();
-  const [isShownSlidingPanel, setIsShownSlidingPanel] = useState<boolean>(false);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -28,14 +27,7 @@ const App = (): JSX.Element => {
       {/* <LayoutFooter /> */}
 
       {/* Sliding content */}
-      <button
-        onClick={() => {
-          setIsShownSlidingPanel(true);
-        }}
-      >
-        Enable sliding panel
-      </button>
-      <ResultPanel isShownSlidingPanel={isShownSlidingPanel} setIsShownSlidingPanel={setIsShownSlidingPanel} />
+      <ResultPanel />
     </div>
   );
 };

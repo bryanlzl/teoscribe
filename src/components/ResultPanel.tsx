@@ -14,7 +14,7 @@ const ResultPanel = () => {
   const { appViewState, setAppViewState } = useAppViewState();
   const { theme } = useTheme();
 
-  const [isCopied, setIsCopied] = useState(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
 
   const handleCopy = (inputString: string): void => {
     navigator.clipboard
