@@ -1,0 +1,17 @@
+soundfile
+moviepy
+silero-vad
+paddlepaddle-gpu
+paddleocr
+python-Levenshtein
+torch
+torchaudio
+datasets[audio]
+transformers
+accelerate
+evaluate
+jiwer
+bitsandbytes==0.37
+accelerate
+wandb
+#!pip install peft git+https://github.com/huggingface/peft@ec267c6
