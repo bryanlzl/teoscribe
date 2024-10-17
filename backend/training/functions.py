@@ -6,12 +6,15 @@ from transformers import TrainerCallback, TrainingArguments, TrainerState, Train
 from torch.utils.data import Dataset
 import torchaudio.transforms as T
 
-# Dataset
+processor = WhisperProcessor.from_pretrained("openai/whisper-small", language="zh", task="transcribe") ### zh
+metric = evaluate.load("wer")
+
+# Dataset: resample, get log mel, tokenize
 class MyDataset(Dataset):
     """
     data = MyDataset("/scratch/users/nus/e1329380/cs5647/crawled/audio", "/scratch/users/nus/e1329380/cs5647/crawled/dataset.json")
     """
-    def __init__(self, dataset_root, sampling_rate, annotation_path):
+    def __init__(self, dataset_root, annotation_path, sampling_rate=16000):
         self.dataset_root = dataset_root
         self.sampling_rate = sampling_rate
         self.annotation_path = annotation_path
@@ -32,31 +35,24 @@ class MyDataset(Dataset):
         # Load audio
         if audio_file not in self.audio_cache:
             audio_array, sampling_rate = torchaudio.load(audio_file)
-            self.audio_cache[audio_file] = (audio_array, sampling_rate)
+            # resample if necessary
+            if sampling_rate != self.sampling_rate:
+                resampler = T.Resample(sampling_rate, self.sampling_rate, dtype=audio_array.dtype)
+                audio_array = resampler(audio_array)
+            self.audio_cache[audio_file] = audio_array
         else:
-            audio_array, sampling_rate = self.audio_cache[audio_file]
+            audio_array = self.audio_cache[audio_file]
             
-        return {"audio": {
-                    "array": audio_array[timestamp_start:timestamp_end],
-                    "sampling_rate": sampling_rate,
-                },
-                "sentence": subtitle}
-    
-# Data Preparation: resample, get log mel, tokenize
-processor = WhisperProcessor.from_pretrained("openai/whisper-small", language="zh", task="transcribe") ### zh
-def prepare_dataset(batch):
-    # load and resample audio data from 48 to 16kHz
-    audio = batch["audio"]
+        audio_segment = audio_array[:, timestamp_start:timestamp_end]
+        # compute log-Mel input features from input audio array
+        input_features = processor.feature_extractor(audio_segment, sampling_rate=self.sampling_rate).input_features[0]
+        # encode target text to label ids
+        labels = processor.tokenizer(subtitle).input_ids
 
-    # compute log-Mel input features from input audio array
-    batch["input_features"] = processor.feature_extractor(audio["array"], sampling_rate=audio["sampling_rate"]).input_features[0]
-
-    # encode target text to label ids
-    batch["labels"] = processor.tokenizer(batch["sentence"]).input_ids
-    return batch
+        return {"input_features": input_features,
+                "labels": labels}
 
 # Evaluation Metrics
-metric = evaluate.load("wer")
 def compute_metrics(pred):
     pred_ids = pred.predictions
     label_ids = pred.label_ids
