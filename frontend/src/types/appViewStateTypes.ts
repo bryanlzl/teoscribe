@@ -4,7 +4,7 @@ export interface IAppViewState {
   transcriptionResult: boolean;
   transllationResult: boolean;
   panels: {
-    resultPanel: boolean;
-    playbackPanel: boolean;
+    resultPanel: { isStacked: boolean; isOpen: boolean };
+    playbackPanel: { isStacked: boolean; isOpen: boolean };
   };
 }

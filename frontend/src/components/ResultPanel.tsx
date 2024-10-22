@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ClipboardDocumentIcon, PlayIcon } from '@heroicons/react/24/solid';
 
 import useLangConversion from '../stores/useLangConversion';
@@ -6,22 +6,35 @@ import useTheme from '../stores/useTheme';
 import SlidingUpPanel from './SlideUpPanel';
 import useAppViewState from '../stores/useAppViewState';
 
-// interface IResultPanelProp {
-// }
+interface ICopyState {
+  textTranscribed: boolean;
+  textTranslated: boolean;
+}
 
 const ResultPanel = () => {
   const { conversionSettings } = useLangConversion();
   const { appViewState, setAppViewState } = useAppViewState();
   const { theme } = useTheme();
 
-  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const [copyState, setCopyState] = useState<ICopyState>({ textTranscribed: false, textTranslated: false });
 
-  const handleCopy = (inputString: string): void => {
+  const textTranscribedRef = useRef<HTMLTextAreaElement | null>(null);
+  const textTranslatedRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const handleCopy = (textField: string, inputString: string): void => {
     navigator.clipboard
       .writeText(inputString)
       .then(() => {
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 1500);
+        setCopyState((prev) => {
+          return { ...prev, [textField]: true };
+        });
+        setTimeout(
+          () =>
+            setCopyState((prev) => {
+              return { ...prev, [textField]: false };
+            }),
+          1500,
+        );
       })
       .catch((err) => {
         console.error('Failed to copy text: ', err);
@@ -29,11 +42,20 @@ const ResultPanel = () => {
   };
 
   const disableSlidingPanel = (): void => {
-    setAppViewState({ ...appViewState, panels: { ...appViewState.panels, resultPanel: false } });
+    setAppViewState({
+      ...appViewState,
+      panels: { ...appViewState.panels, resultPanel: { ...appViewState.panels.resultPanel, isOpen: false } },
+    });
   };
 
   return (
-    <SlidingUpPanel offsetHeight={5} isEnabled={appViewState.panels.resultPanel} setIsEnabled={disableSlidingPanel}>
+    <SlidingUpPanel
+      offsetHeight={5}
+      stackedText={'Transcription Results'}
+      isStacked={appViewState.panels.resultPanel.isStacked}
+      isEnabled={appViewState.panels.resultPanel.isOpen}
+      setIsEnabled={disableSlidingPanel}
+    >
       <div className="space-y-[1rem]">
         <span className="flex flex-row justify-center items-center mx-6 w-max-content py-[0.3rem] px-[0.5rem] align-center border-t-[0.15rem] border-b-[0.15rem] border-accent space-x-1 text-xl">
           <h2>Your Audio.</h2> <h2 className="italic">TeoScribed.</h2>
@@ -50,10 +72,17 @@ const ResultPanel = () => {
               <p className="text-start">1 min 32 sec</p>
             </div>
             <div className="absolute top-[3.15rem] right-[2rem]">
-              {isCopied ? (
+              {copyState.textTranscribed ? (
                 <p className="font-bold text-md text-accent text-end self-end">Copied!</p>
               ) : (
-                <ClipboardDocumentIcon onClick={() => handleCopy('')} className="h-[1.5rem] cursor-pointer self-end" />
+                <ClipboardDocumentIcon
+                  onClick={() => {
+                    if (textTranscribedRef.current) {
+                      handleCopy('textTranscribed', textTranscribedRef.current.defaultValue);
+                    }
+                  }}
+                  className="h-[1.5rem] cursor-pointer self-end"
+                />
               )}
             </div>
             {/* Transcription results */}
@@ -64,16 +93,16 @@ const ResultPanel = () => {
             >
               <textarea
                 readOnly
-                className={`textarea h-[27.5vh] py-[0.25rem] w-[100%] text-lg ${
+                className={`textarea h-[25vh] py-[0.25rem] w-[100%] text-lg ${
                   theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                 }`}
                 defaultValue="谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么
-              谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢
-              谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢
-              什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什
-              么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么
-              谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么
-              ​"
+                  谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢
+                  谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢
+                  什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什
+                  么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么
+                  谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么​"
+                ref={textTranscribedRef}
               />
             </div>
           </div>
@@ -86,15 +115,43 @@ const ResultPanel = () => {
         <div className="card mx-3 bg-secondary bg-opacity-75 rounded-sm">
           <div className="card-body px-3 py-2">
             <h2 className="card-title text-lg font-normal">English (translated) </h2>
-            <textarea
-              readOnly
-              className={`textarea h-[27.5vh] rounded-md text-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}
-              defaultValue="Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you 
-            why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank 
-            you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why 
-            Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank 
-            you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why ​"
-            />
+            {/* Copy function */}
+            <div className="absolute top-[3.4rem] flex flex-row justify-center items-center opacity-80 ml-[1rem] space-x-2">
+              <h3>Duration:</h3>
+              <p className="text-start">1 min 32 sec</p>
+            </div>
+            <div className="absolute top-[3.15rem] right-[2rem]">
+              {copyState.textTranslated ? (
+                <p className="font-bold text-md text-accent text-end self-end">Copied!</p>
+              ) : (
+                <ClipboardDocumentIcon
+                  onClick={() => {
+                    if (textTranslatedRef.current) {
+                      handleCopy('textTranslated', textTranslatedRef.current.defaultValue);
+                    }
+                  }}
+                  className="h-[1.5rem] cursor-pointer self-end"
+                />
+              )}
+            </div>
+            <div
+              className={`pt-[2.5rem] px-[0.05rem] w-[100%] h-[100%] rounded-md ${
+                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+              }`}
+            >
+              <textarea
+                readOnly
+                className={`textarea h-[24vh] w-[100%] rounded-md text-lg ${
+                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                }`}
+                defaultValue="Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you 
+                    why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank 
+                    you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why 
+                    Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank 
+                    you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why Thank you why ​"
+                ref={textTranslatedRef}
+              />
+            </div>
           </div>
         </div>
       </div>

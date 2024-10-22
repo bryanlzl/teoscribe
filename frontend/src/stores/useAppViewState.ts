@@ -8,7 +8,7 @@ const useAppViewStateStore = create<IAppViewStateStore>((set) => ({
     isTranslating: false,
     transcriptionResult: false,
     transllationResult: false,
-    panels: { resultPanel: false, playbackPanel: false },
+    panels: { resultPanel: { isStacked: false, isOpen: false }, playbackPanel: { isStacked: false, isOpen: false } },
   },
   setAppViewState: (appViewState: IAppViewState) => set({ appViewState }),
 }));
