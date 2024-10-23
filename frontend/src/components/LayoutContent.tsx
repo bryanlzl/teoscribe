@@ -7,7 +7,10 @@ const LayoutContent = (): JSX.Element => {
 
   // Just triggers ResultsPanel
   const runTranscriptionModel = (): void => {
-    setAppViewState({ ...appViewState, panels: { ...appViewState.panels, resultPanel: true } });
+    setAppViewState({
+      ...appViewState,
+      panels: { ...appViewState.panels, resultPanel: { ...appViewState.panels.resultPanel, isOpen: true } },
+    });
   };
 
   return (

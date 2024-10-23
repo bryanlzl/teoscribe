@@ -4,6 +4,7 @@ import LayoutContent from './components/LayoutContent';
 import LayoutHeader from './components/LayoutHeader';
 // import LayoutFooter from './components/LayoutFooter';
 import ResultPanel from './components/ResultPanel';
+import PlaybackPanel from './components/PlaybackPanel';
 
 const App = (): JSX.Element => {
   const { theme } = useTheme();
@@ -28,6 +29,7 @@ const App = (): JSX.Element => {
 
       {/* Sliding content */}
       <ResultPanel />
+      <PlaybackPanel />
     </div>
   );
 };

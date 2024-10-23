@@ -3,12 +3,21 @@ import { ArrowDownIcon } from '@heroicons/react/24/outline';
 
 interface ISlidingUpPanelProps {
   children: React.ReactNode;
+  stackedText: string;
+  isStacked: boolean;
   offsetHeight: number;
   isEnabled: boolean;
   setIsEnabled: Dispatch<SetStateAction<boolean>>;
 }
 
-const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({ children, offsetHeight, isEnabled, setIsEnabled }) => {
+const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({
+  children,
+  stackedText,
+  isStacked,
+  offsetHeight,
+  isEnabled,
+  setIsEnabled,
+}) => {
   const [chevronIconRotate, setChevronIconRotate] = useState<string>('rotate-0');
   const [isHovered, setIsHovered] = useState(false);
 
@@ -20,26 +29,32 @@ const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({ children, offsetHeight, isEn
       }}
       className="absolute bottom-0 w-full bg-secondary text-center transition-all duration-500 ease-in-out overflow-hidden"
     >
-      <button
-        className="btn btn-xs w-[100%] h-[2.5rem] bg-secondary hover:bg-transparent border-none shadow-none no-animation rounded-none"
-        onClick={() => {
-          setIsEnabled(!isEnabled);
-        }}
-        onMouseEnter={() => {
-          setChevronIconRotate('rotate-0');
-          setIsHovered(true);
-        }}
-        onMouseLeave={() => {
-          setChevronIconRotate('rotate-180');
-          setIsHovered(false);
-        }}
-      >
-        <ArrowDownIcon
-          className={`h-[1.2rem] transition-transform duration-500 ${
-            isHovered ? 'animate-float-up-down' : ''
-          } ${chevronIconRotate}`}
-        />
-      </button>
+      {isStacked ? (
+        <p className="h-[3rem] mb-[2rem] font-bold opacity-50 flex items-center justify-center self-center">
+          {stackedText}
+        </p>
+      ) : (
+        <button
+          className="btn btn-xs w-[100%] h-[2.5rem] bg-secondary hover:bg-transparent border-none shadow-none no-animation rounded-none"
+          onClick={() => {
+            setIsEnabled(!isEnabled);
+          }}
+          onMouseEnter={() => {
+            setChevronIconRotate('rotate-0');
+            setIsHovered(true);
+          }}
+          onMouseLeave={() => {
+            setChevronIconRotate('rotate-180');
+            setIsHovered(false);
+          }}
+        >
+          <ArrowDownIcon
+            className={`h-[1.2rem] transition-transform duration-500 ${
+              isHovered ? 'animate-float-up-down' : ''
+            } ${chevronIconRotate}`}
+          />
+        </button>
+      )}
 
       <div
         className={`${!isEnabled ? 'hidden' : ''} transition-opacity duration-500 ${
