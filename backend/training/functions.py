@@ -14,11 +14,19 @@ class MyDataset(Dataset):
     """
     data = MyDataset("/scratch/users/nus/e1329380/cs5647/crawled/audio", "/scratch/users/nus/e1329380/cs5647/crawled/dataset.json")
     """
-    def __init__(self, dataset_root, annotation_path, sampling_rate=16000):
+    def __init__(self, dataset_root, annotation_path, clean_audio, sampling_rate=16000):
         self.dataset_root = dataset_root
         self.sampling_rate = sampling_rate
         self.annotation_path = annotation_path
+        self.clean_audio = clean_audio
         self.all_annotations = json.load(open(self.annotation_path))
+        
+        # duration
+        total_duration = 0
+        for i in range(len(self.all_annotations)):
+            total_duration += (self.all_annotations[i]['timestamp_end'] - self.all_annotations[i]['timestamp_start'])/16000
+        print(f"Total duration of this dataset is {total_duration/60/60} hours")
+        
         # Initialize caching of processed audio
         self.audio_cache = {}
 
@@ -30,11 +38,12 @@ class MyDataset(Dataset):
         subtitle = row["subtitle"]
         timestamp_start = int(row["timestamp_start"])
         timestamp_end = int(row["timestamp_end"])
-        audio_file = os.path.join(self.dataset_root, row["audio_file"])
+        audio_file = os.path.join(self.dataset_root, row["audio_file"]) if not self.clean_audio else os.path.join(self.dataset_root, row["cleaned_audio_file"])
         
         # Load audio
         if audio_file not in self.audio_cache:
             audio_array, sampling_rate = torchaudio.load(audio_file)
+            audio_array = torch.mean(audio_array, dim=0).squeeze(0)
             # resample if necessary
             if sampling_rate != self.sampling_rate:
                 resampler = T.Resample(sampling_rate, self.sampling_rate, dtype=audio_array.dtype)
@@ -43,7 +52,7 @@ class MyDataset(Dataset):
         else:
             audio_array = self.audio_cache[audio_file]
             
-        audio_segment = audio_array[:, timestamp_start:timestamp_end]
+        audio_segment = audio_array[timestamp_start:timestamp_end].numpy()
         # compute log-Mel input features from input audio array
         input_features = processor.feature_extractor(audio_segment, sampling_rate=self.sampling_rate).input_features[0]
         # encode target text to label ids

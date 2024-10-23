@@ -1,6 +1,6 @@
 from functions import *
 from tqdm import tqdm
-import argparse, json, os
+import argparse, json, os#, tempfile
 
 parser = argparse.ArgumentParser(description='Crawling')
 parser.add_argument('--data_path', type=str, help='path to folder containing cropped videos')
@@ -8,11 +8,23 @@ parser.add_argument('--crawled_path', type=str, help='path to folder containing 
 args = parser.parse_args()
 
 print("Starting crawling...")
-out = []
+
+# Ensure output directories exist
+audio_output_dir = os.path.join(args.crawled_path, 'audio')
+os.makedirs(audio_output_dir, exist_ok=True)
+
+# Load already processed data
+existing_data, processed_videos = load_existing_dataset(args.crawled_path)
+out = existing_data.copy()
+
 PATHS = os.listdir(args.data_path)
 for PATH in PATHS:
     print(f"Processing {PATH}")
     if PATH.endswith(".mp4"):
+        if PATH.split(".mp4")[0] + ".wav" in processed_videos:
+            print(f"Skipping {PATH}, already processed.")
+            continue  # Skip this video
+
         extractsubtitle = SubtitleExtractor(f"{args.data_path}/{PATH}")
         
         # get audio segments
@@ -39,11 +51,16 @@ for PATH in PATHS:
             if best_subtitle:
                 out.append({
                     "audio_file": audio_fn,
+                    "cleaned_audio_file": f"cleaned_{audio_fn}",
                     "timestamp_start": timestamps[i]['start'],
                     "timestamp_end": timestamps[i]['end'],
                     "subtitle": best_subtitle
                 })
 
 # write crawled data
+# temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf8')
+# json.dump(out, temp_file, ensure_ascii=False, indent=4)
+# temp_file.close()
+# os.replace(temp_file.name, f'{args.crawled_path}/dataset.json')
 with open(f'{args.crawled_path}/dataset.json', 'w', encoding ='utf8') as json_file:
     json.dump(out, json_file, ensure_ascii = False, indent = 4)

@@ -11,7 +11,9 @@ transformers
 accelerate
 evaluate
 jiwer
-bitsandbytes==0.37
+bitsandbytes
+peft
 accelerate
 wandb
-#!pip install peft git+https://github.com/huggingface/peft@ec267c6
+noisereduce
+pydub

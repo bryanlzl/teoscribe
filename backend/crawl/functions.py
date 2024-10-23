@@ -1,17 +1,17 @@
-# import os, re
-from collections import defaultdict
+import json, os
+from collections import defaultdict, Counter
 from moviepy.editor import VideoFileClip
 import moviepy.editor as mp
-import matplotlib.pyplot as plt
-from silero_vad import load_silero_vad, read_audio, get_speech_timestamps
+from silero_vad import load_silero_vad, get_speech_timestamps
 import torch
 import torchaudio
 import torchaudio.transforms as T
 from IPython.display import Audio
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageEnhance
 from paddleocr import PaddleOCR
 import Levenshtein
+from noisereduce import reduce_noise
 
 from ppocr.utils.logging import get_logger
 import logging
@@ -27,6 +27,19 @@ ocr = PaddleOCR(use_angle_cls=False, det = False, lang='ch', use_gpu=True)  # Ad
 # Chinese Traditional	(chinese_cht)
 # Chinese & English	(ch)
 # English	(en)
+
+# Load existing dataset to track processed videos
+def load_existing_dataset(crawled_path):
+    dataset_path = os.path.join(crawled_path, 'dataset.json')
+    if os.path.exists(dataset_path):
+        with open(dataset_path, 'r', encoding='utf8') as f:
+            existing_data = json.load(f)
+            # Extract processed audio filenames for quick lookup
+            processed_videos = set(item['audio_file'] for item in existing_data)
+    else:
+        existing_data = []
+        processed_videos = set()
+    return existing_data, processed_videos
 
 # create a class for extracting audio segments
 class AudioExtractor:
@@ -54,6 +67,11 @@ class AudioExtractor:
         else:
             self.waveform_resampled = self.waveform_mono
 
+        # noise reduce
+        self.cleaned_waveform = self.clean_audio()
+        torchaudio.save(f"{out_path}/audio/cleaned_{self.audio_fn}", self.cleaned_waveform, self.sample_rate)
+
+
     def get_speech_timestamps(self, model):
         """
         Outputs a list of speech timestamps ecah in the form of dictionary {start: ..., end: ...}.
@@ -62,7 +80,7 @@ class AudioExtractor:
         # return only segments longer than 2 seconds
         # (some audio segments very short, like 0 to 1s)
         # perhaps is VAD not gd at very short speeches
-        return [x for x in raw if (x['end'] - x['start'])/self.resample_rate > 2]
+        return [x for x in raw if (x['end'] - x['start'])/self.resample_rate >= 1.5] ### 2
 
     def play_audio_segment(self, start, end):
         """
@@ -81,9 +99,18 @@ class AudioExtractor:
 
     def clean_audio(self):
         """
-        Do we need to clean the audio like standardise/remove background noises?
+        Try to reduce background noises
+        Using noisereduce
         """
-        return
+        # Convert the audio to a NumPy array
+        waveform_np = self.waveform.squeeze().numpy()
+
+        # Use the noisereduce package to reduce background noise
+        cleaned_waveform = reduce_noise(y=waveform_np, sr=self.sample_rate)
+
+        # Convert back to a torch tensor
+        cleaned_waveform_tensor = torch.from_numpy(cleaned_waveform)
+        return cleaned_waveform_tensor
 
 # create class for extracting hard-coded subtitle
 def play_video_segment(video_segment):
@@ -91,13 +118,17 @@ def play_video_segment(video_segment):
     Play in original video sampling rate.
     More for self-checking.
     """
-    return video_segment.ipython_display()
+    return video_segment.ipython_display(width=1024, height=576)
 
-def apply_ocr(image_path, ocr):
+def apply_ocr(image, ocr):
     """
     Apply OCR to an image.
     """
-    result = ocr.ocr(image_path, cls=False, det=False, rec=True)
+    # Convert PIL Image to NumPy array
+    if isinstance(image, Image.Image):  # Check if the image is a PIL Image
+        image = np.array(image)
+
+    result = ocr.ocr(image, cls=False, det=False, rec=True)
     extracted_text = ""
 
     for line in result:
@@ -149,19 +180,23 @@ class SubtitleExtractor:
 
     def get_frames_and_extract_subtitle(self, video_segment, frame_interval = 0.25):
         """
-        One segment only.
         Extract frames containing subtitle at a regular interval.
-        For each frame, crop the subtitle region (subtitles usually appear (e.g., the bottom part of the video)).
+        For each frame, already cropped the subtitle region (subtitles usually appear (e.g., the bottom part of the video)).
         Can possibly improve accuracy by focusing only on the subtitle area.
 
         frame_interval = 1 # (e.g., 1 frame per second)
         frame_interval = 0.5 # (e.g., 2 frames per second)
         frame_interval = 0.25 # (e.g., 4 frames per second)
+
+        added contrasting to improve image quality for better subtitle extraction
         """
         subtitles = {}
         for t in np.arange(0, int(video_segment.duration), frame_interval):
             frame = video_segment.get_frame(t)
-            # frame = Image.fromarray(frame)
+            frame = Image.fromarray(frame)
+            # Contrast to enhance image quality for subtitle extraction
+            enhancer = ImageEnhance.Contrast(frame)
+            frame = enhancer.enhance(1.25)
             subtitle_text = apply_ocr(frame, ocr)
             if subtitle_text:
                 subtitles[t] = subtitle_text
@@ -213,7 +248,7 @@ class SubtitleExtractor:
         """
         grouped_subtitles = defaultdict(list)
 
-        for path, subtitle in subtitles.items():
+        for _, subtitle in subtitles.items():
             # Clean up subtitle (e.g., remove non-Chinese if needed)
             filtered_subtitle = filter_non_chinese(subtitle)
 
@@ -233,7 +268,7 @@ class SubtitleExtractor:
 
     def choose_best_subtitle(self, grouped_subtitles):
         """
-        Currently implemented choose longest for same group. BUT OBVIOUSLY NOT BEST SOLUTION...
+        Currently implemented chose mode, most frequent subtitle used.
         Groups similar subtitles and concatenates different sequences.
         Uses Levenshtein distance to group similar ones.
         - Can consider:
@@ -243,9 +278,12 @@ class SubtitleExtractor:
         """
         final_subtitle = ""
 
-        for key, group in grouped_subtitles.items():
-            # For each group, choose the longest subtitle as the best one
-            longest_subtitle = max(group, key=len)
-            final_subtitle += longest_subtitle + " "
+        # for key, group in grouped_subtitles.items():
+        #     # For each group, choose the longest subtitle as the best one
+        #     longest_subtitle = max(group, key=len)
+        #     final_subtitle += longest_subtitle + " "
+        for _, group in grouped_subtitles.items():
+            most_common_subtitle = Counter(group).most_common(1)[0][0]
+            final_subtitle += most_common_subtitle + " "
 
         return final_subtitle.strip()
