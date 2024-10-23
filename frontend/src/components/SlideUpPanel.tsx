@@ -1,8 +1,10 @@
 import React, { FC, Dispatch, SetStateAction, useState } from 'react';
 import { ArrowDownIcon } from '@heroicons/react/24/outline';
+import useAppViewState from '../stores/useAppViewState';
 
 interface ISlidingUpPanelProps {
   children: React.ReactNode;
+  component: string;
   stackedText: string;
   isStacked: boolean;
   offsetHeight: number;
@@ -12,14 +14,37 @@ interface ISlidingUpPanelProps {
 
 const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({
   children,
+  component,
   stackedText,
   isStacked,
   offsetHeight,
   isEnabled,
-  setIsEnabled,
 }) => {
+  const { appViewState, setAppViewState } = useAppViewState();
+
   const [chevronIconRotate, setChevronIconRotate] = useState<string>('rotate-0');
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+
+  const undoStackedTitle = (componentName: string): void => {
+    if (componentName === 'playbackPanel') {
+      setAppViewState({
+        ...appViewState,
+        panels: {
+          ...appViewState.panels,
+          resultPanel: { ...appViewState.panels.resultPanel, isStacked: false },
+          playbackPanel: { ...appViewState.panels.resultPanel, isOpen: false, isStacked: false },
+        },
+      });
+    } else {
+      setAppViewState({
+        ...appViewState,
+        panels: {
+          ...appViewState.panels,
+          resultPanel: { ...appViewState.panels.resultPanel, isStacked: false, isOpen: false },
+        },
+      });
+    }
+  };
 
   return (
     <div
@@ -37,7 +62,7 @@ const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({
         <button
           className="btn btn-xs w-[100%] h-[2.5rem] bg-secondary hover:bg-transparent border-none shadow-none no-animation rounded-none"
           onClick={() => {
-            setIsEnabled(!isEnabled);
+            undoStackedTitle(component);
           }}
           onMouseEnter={() => {
             setChevronIconRotate('rotate-0');
