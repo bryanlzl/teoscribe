@@ -15,7 +15,7 @@ const LayoutContent = (): JSX.Element => {
       setTimeout(() => {
         setIsLoading(false);
       }, 1500);
-    }, 25);
+    }, 2500);
   };
 
   // Just triggers sliding up of ResultsPanel
