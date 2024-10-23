@@ -2,6 +2,7 @@ import { useState } from 'react';
 import useAppViewState from '../stores/useAppViewState';
 import SelectLangConversion from './SelectLangConversion';
 import { MicrophoneIcon } from '@heroicons/react/24/solid';
+import { RingLoader } from 'react-spinners';
 
 const LayoutContent = (): JSX.Element => {
   const { appViewState, setAppViewState } = useAppViewState();
@@ -14,14 +15,17 @@ const LayoutContent = (): JSX.Element => {
       setTimeout(() => {
         setIsLoading(false);
       }, 1500);
-    }, 2500);
+    }, 25);
   };
 
   // Just triggers sliding up of ResultsPanel
   const runTranscriptionModel = (): void => {
     setAppViewState({
       ...appViewState,
-      panels: { ...appViewState.panels, resultPanel: { ...appViewState.panels.resultPanel, isOpen: true } },
+      panels: {
+        ...appViewState.panels,
+        resultPanel: { ...appViewState.panels.resultPanel, isOpen: true, isStacked: false },
+      },
     });
   };
 
@@ -32,7 +36,7 @@ const LayoutContent = (): JSX.Element => {
         <h2 className="text-center opacity-75">Tap to speak</h2>
         <button className="btn btn-circle w-[15.5rem] h-[15.5rem] bg-primary" onClick={handleButtonClick}>
           {isLoading ? (
-            <span className="loading loading-ring loading-lg w-[10rem]" />
+            <RingLoader loading={true} color="#88B0A3" size={165} aria-label="Loading Spinner" data-testid="loader" />
           ) : (
             <MicrophoneIcon className="w-[50%] h-auto text-accent" />
           )}

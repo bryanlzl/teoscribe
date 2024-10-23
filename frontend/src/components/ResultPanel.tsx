@@ -44,12 +44,36 @@ const ResultPanel = () => {
   const disableSlidingPanel = (): void => {
     setAppViewState({
       ...appViewState,
-      panels: { ...appViewState.panels, resultPanel: { ...appViewState.panels.resultPanel, isOpen: false } },
+      panels: {
+        ...appViewState.panels,
+        resultPanel: { ...appViewState.panels.resultPanel, isOpen: false, isStacked: false },
+      },
     });
+  };
+
+  const openPlaybackPanel = (): void => {
+    setAppViewState({
+      ...appViewState,
+      panels: {
+        ...appViewState.panels,
+        playbackPanel: { ...appViewState.panels.playbackPanel, isOpen: true },
+      },
+    });
+    setTimeout(() => {
+      setAppViewState({
+        ...appViewState,
+        panels: {
+          ...appViewState.panels,
+          resultPanel: { ...appViewState.panels.resultPanel, isStacked: true },
+          playbackPanel: { ...appViewState.panels.playbackPanel, isOpen: true },
+        },
+      });
+    }, 500);
   };
 
   return (
     <SlidingUpPanel
+      component="resultPanel"
       offsetHeight={5}
       stackedText={'Transcription Results'}
       isStacked={appViewState.panels.resultPanel.isStacked}
@@ -106,7 +130,10 @@ const ResultPanel = () => {
               />
             </div>
           </div>
-          <button className="btn btn-xs mx-3 h-[2rem] w-max-content flex flex-row justify-center items-center bg-primary hover:bg-neutral border-none rounded-md text-center opacity-90">
+          <button
+            className="btn btn-xs mx-3 h-[2rem] w-max-content flex flex-row justify-center items-center bg-primary hover:bg-neutral border-none rounded-md text-center opacity-90"
+            onClick={openPlaybackPanel}
+          >
             <PlayIcon className="h-[1.4rem] text-font" />
             <p className="font-bold w-fit text-[0.95rem] text-font">Play Subtitled Recording</p>
           </button>
@@ -117,8 +144,7 @@ const ResultPanel = () => {
             <h2 className="card-title text-lg font-normal">English (translated) </h2>
             {/* Copy function */}
             <div className="absolute top-[3.4rem] flex flex-row justify-center items-center opacity-80 ml-[1rem] space-x-2">
-              <h3>Duration:</h3>
-              <p className="text-start">1 min 32 sec</p>
+              <h3>Translation from {conversionSettings.targetLanguage}</h3>
             </div>
             <div className="absolute top-[3.15rem] right-[2rem]">
               {copyState.textTranslated ? (
@@ -135,7 +161,7 @@ const ResultPanel = () => {
               )}
             </div>
             <div
-              className={`pt-[2.5rem] px-[0.05rem] w-[100%] h-[100%] rounded-md ${
+              className={`pt-[2rem] px-[0.05rem] w-[100%] h-[100%] rounded-md ${
                 theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
               }`}
             >
