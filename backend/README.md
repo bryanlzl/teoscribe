@@ -18,12 +18,14 @@ crawled/
 [
   {
     "audio_file": "audio/audio1.wav",
+    "cleaned_audio_file": "audio/cleaned_audio1.wav",
     "timestamp_start": 0.0,
     "timestamp_end": 3.5,
     "subtitle": "如果沒在你帮我搬上去吧"
   },
   {
     "audio_file": "audio/audio2.wav",
+    "cleaned_audio_file": "audio/cleaned_audio2.wav",
     "timestamp_start": 3.6,
     "timestamp_end": 6.0,
     "subtitle": "喉我得打电话跟她说 让她别喊了 别等下让别人误会有什么"
@@ -35,11 +37,12 @@ crawled/
 - VAD: silero_vad
 - OCR: PaddleOCR
 - Levenshtein distance
-- Noise removal: 
+- Noise removal: noisereduce (cleaned)
+- Image enhancement: increased contrast
 
 #### Prepare Data
 ``` 2>&1 | tee crawl.log
-python crawl.py --data_path "/scratch/users/nus/e1329380/cs5647/downloaded" --crawled_path "/scratch/users/nus/e1329380/cs5647/crawled"
+OMP_NUM_THREADS=1 python crawl.py --data_path "/scratch/users/nus/e1329380/cs5647/downloaded" --crawled_path "/scratch/users/nus/e1329380/cs5647/crawled"
 ```
 
 ## 2) Model Training
