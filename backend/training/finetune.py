@@ -133,6 +133,21 @@ def predict(peft_path, audio_path, do_peft):
     
     return text
 
+def predict_api(pipeline, audio_path):
+    """
+    Used for API calls. Should preload pipeline, to avoid loading pipeline at every single API call.
+    """
+    # audio to test
+    waveform, sampling_rate = torchaudio.load(audio_path)
+    waveform = torch.mean(waveform, dim=0)
+    if sampling_rate != 16000:
+        print("resample")
+        resampler = T.Resample(sampling_rate, 16000, dtype=waveform.dtype)
+        waveform = resampler(waveform)
+    text = pipeline(waveform.numpy(), generate_kwargs={"forced_decoder_ids": forced_decoder_ids}, max_new_tokens=128)["text"]
+    
+    return text
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Training')
     parser.add_argument('--audio_path', type=str, help='path to folder containing audios')
