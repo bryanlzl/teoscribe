@@ -5,6 +5,7 @@ import argparse, json, os#, tempfile
 parser = argparse.ArgumentParser(description='Crawling')
 parser.add_argument('--data_path', type=str, help='path to folder containing cropped videos')
 parser.add_argument('--crawled_path', type=str, help='path to folder containing crawled')
+parser.add_argument("--audio_only", action="store_true", help="whether to crawl audio only")
 args = parser.parse_args()
 
 print("Starting crawling...")
@@ -25,7 +26,8 @@ for PATH in PATHS:
             print(f"Skipping {PATH}, already processed.")
             continue  # Skip this video
 
-        extractsubtitle = SubtitleExtractor(f"{args.data_path}/{PATH}")
+        if not args.audio_only:
+            extractsubtitle = SubtitleExtractor(f"{args.data_path}/{PATH}")
         
         # get audio segments
         segmenting = AudioExtractor(PATH, args.data_path, args.crawled_path)
@@ -34,27 +36,35 @@ for PATH in PATHS:
         
         # loop through each segment
         for i in tqdm(range(len(timestamps))):
-            video_segment = extractsubtitle.get_video_segment(timestamps[i]['start'], timestamps[i]['end'])
-        
-            # # extract cropped frames for that video segment
-            # paths_to_frames = extractsubtitle.get_frames_of_cropped_subtitle_region(video_segment, i)
+            if not args.audio_only:
+                video_segment = extractsubtitle.get_video_segment(timestamps[i]['start'], timestamps[i]['end'])
             
-            # # Apply OCR
-            # subtitles = extractsubtitle.extract_subtitles(paths_to_frames, ocr)
-
-            # extract cropped frames for that video segment and apply ocr
-            subtitles = extractsubtitle.get_frames_and_extract_subtitle(video_segment)
-            grouped_subtitles = extractsubtitle.group_similar_subtitles(subtitles)
-            best_subtitle = extractsubtitle.choose_best_subtitle(grouped_subtitles)
-
-            # might be empty
-            if best_subtitle:
+                # # extract cropped frames for that video segment
+                # paths_to_frames = extractsubtitle.get_frames_of_cropped_subtitle_region(video_segment, i)
+                
+                # # Apply OCR
+                # subtitles = extractsubtitle.extract_subtitles(paths_to_frames, ocr)
+    
+                # extract cropped frames for that video segment and apply ocr
+                subtitles = extractsubtitle.get_frames_and_extract_subtitle(video_segment)
+                grouped_subtitles = extractsubtitle.group_similar_subtitles(subtitles)
+                best_subtitle = extractsubtitle.choose_best_subtitle(grouped_subtitles)
+    
+                # might be empty
+                if best_subtitle:
+                    out.append({
+                        "audio_file": audio_fn,
+                        "cleaned_audio_file": f"cleaned_{audio_fn}",
+                        "timestamp_start": timestamps[i]['start'],
+                        "timestamp_end": timestamps[i]['end'],
+                        "subtitle": best_subtitle
+                    })
+            else:
                 out.append({
                     "audio_file": audio_fn,
                     "cleaned_audio_file": f"cleaned_{audio_fn}",
                     "timestamp_start": timestamps[i]['start'],
-                    "timestamp_end": timestamps[i]['end'],
-                    "subtitle": best_subtitle
+                    "timestamp_end": timestamps[i]['end']
                 })
 
 # write crawled data
