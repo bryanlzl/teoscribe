@@ -44,6 +44,7 @@ crawled/
 
 #### Prepare Data
 ``` 2>&1 | tee crawl.log
+# --audio_only, if crawling for audio only (no subtitle)
 OMP_NUM_THREADS=1 python crawl.py --data_path "/scratch/users/nus/e1329380/cs5647/downloaded" --crawled_path "/scratch/users/nus/e1329380/cs5647/crawled"
 ```
 
