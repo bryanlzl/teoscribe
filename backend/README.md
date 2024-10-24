@@ -1,4 +1,6 @@
 ## 1) Crawl Teochew videos
+**We downloaded a whole bunch of cropped Teochew videos at:** https://drive.google.com/drive/folders/1D_LhdBszNeJllwSA4Y1OnY2oLTcEvt2G (Mount to access???)
+
 **We store our data at:** https://drive.google.com/drive/folders/1D_LhdBszNeJllwSA4Y1OnY2oLTcEvt2G (Mount to access???)
 ```
 crawled/
@@ -34,17 +36,40 @@ crawled/
 ```
 
 #### Techniques used to clean/crawl for the data:
-- VAD: silero_vad
-- OCR: PaddleOCR
-- Levenshtein distance
-- Noise removal: noisereduce (cleaned)
+- VAD: silero_vad (segment audio)
+- OCR: PaddleOCR (extract subtitles)
+- Levenshtein distance to detect repeated subtitles, grouped together and take mode.
+- Noise removal: noisereduce
 - Image enhancement: increased contrast
 
 #### Prepare Data
 ``` 2>&1 | tee crawl.log
+# --audio_only, if crawling for audio only (no subtitle)
 OMP_NUM_THREADS=1 python crawl.py --data_path "/scratch/users/nus/e1329380/cs5647/downloaded" --crawled_path "/scratch/users/nus/e1329380/cs5647/crawled"
 ```
 
 ## 2) Model Training
-#### Finetune Whisper
-#### Self-training
+#### Finetune Whisper (teacher model)
+- Currently, I fixed the training hyperparameters.
+- PEFT LoRA is used to fine-tune Whisper-small model.
+
+You can train either from Python:
+``` python
+from finetune import *
+train(audio_path=, annotated_path=, wandb=, cleaned_audio=)
+```
+or Command Line:
+```
+# add --wandb, if logging to wandb, add --cleaned_audio, if training on cleaned audio
+python finetune.py --audio_path "/scratch/users/nus/e1329380/cs5647/crawled/audio" --annotated_path "/scratch/users/nus/e1329380/cs5647/crawled/dataset.json"
+```
+
+For prediction,
+``` python
+from finetune import *
+# input audio must be in .wav format
+# do_peft=True if loading PEFT model, else False
+predict("/scratch/users/nus/e1329380/cs5647/finetuned/checkpoint-440/", "/scratch/users/nus/e1329380/cs5647/testing/Money.wav", do_peft=True)
+# outputs the predicted transcription as text
+```
+#### Self-training (teacher teaches student model)

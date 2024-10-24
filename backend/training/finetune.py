@@ -106,15 +106,18 @@ def train(audio_path, annotated_path, do_wandb, clean_audio):
 def evaluation():
     return
 
-def predict(peft_path, audio_path):
+def predict(peft_path, audio_path, do_peft):
     language = "zh"
     task = "transcribe"
     # load model
-    peft_config = PeftConfig.from_pretrained(peft_path)
-    model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
-    model = PeftModel.from_pretrained(model, peft_path)
-    tokenizer = WhisperTokenizer.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
-    processor = WhisperProcessor.from_pretrained(peft_config.base_model_name_or_path, language=language, task=task)
+    if do_peft:
+        peft_config = PeftConfig.from_pretrained(peft_path)
+        model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
+        model = PeftModel.from_pretrained(model, peft_path)
+    else:
+        model = WhisperForConditionalGeneration.from_pretrained(peft_path, device_map="auto")
+    tokenizer = WhisperTokenizer.from_pretrained(peft_path, language=language, task=task)
+    processor = WhisperProcessor.from_pretrained(peft_path, language=language, task=task)
     feature_extractor = processor.feature_extractor
     forced_decoder_ids = processor.get_decoder_prompt_ids(language=language, task=task)
     pipeline = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=feature_extractor)
@@ -130,10 +133,25 @@ def predict(peft_path, audio_path):
     
     return text
 
+def predict_api(pipeline, audio_path):
+    """
+    Used for API calls. Should preload pipeline, to avoid loading pipeline at every single API call.
+    """
+    # audio to test
+    waveform, sampling_rate = torchaudio.load(audio_path)
+    waveform = torch.mean(waveform, dim=0)
+    if sampling_rate != 16000:
+        print("resample")
+        resampler = T.Resample(sampling_rate, 16000, dtype=waveform.dtype)
+        waveform = resampler(waveform)
+    text = pipeline(waveform.numpy(), generate_kwargs={"forced_decoder_ids": forced_decoder_ids}, max_new_tokens=128)["text"]
+    
+    return text
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Training')
     parser.add_argument('--audio_path', type=str, help='path to folder containing audios')
-    parser.add_argument('--annotated_path', type=str, help='path to folder containing annotated data')
+    parser.add_argument('--annotated_path', type=str, help='path to file containing annotated data')
     parser.add_argument("--wandb", action="store_true", help="whether to use wandb to track")
     parser.add_argument("--cleaned_audio", action="store_true", help="whether to use wandb to track")
     args = parser.parse_args()
