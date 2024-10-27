@@ -1,3 +1,8 @@
+# Server/API dependencies
+fastapi
+uvicorn
+
+# Model dependencies
 soundfile
 moviepy
 silero-vad
