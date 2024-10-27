@@ -3,3 +3,5 @@ __pycache__
 wandb
 run*.sh
 run*.pbs
+backend/model/clean_model
+backend/model/clean_semantics_model
