@@ -1,4 +1,4 @@
-from transformers import WhisperForConditionalGeneration, Seq2SeqTrainingArguments, Seq2SeqTrainer, Seq2SeqTrainingArguments, AutomaticSpeechRecognitionPipeline, WhisperTokenizer
+from transformers import WhisperForConditionalGeneration, Seq2SeqTrainer, Seq2SeqTrainingArguments, AutomaticSpeechRecognitionPipeline, WhisperTokenizer
 from torch.utils.data import random_split
 from peft import LoraConfig, PeftConfig, PeftModel, LoraModel, get_peft_model
 import random, torch, wandb
@@ -12,7 +12,7 @@ torch.manual_seed(2024)
 random.seed(2024)
 np.random.seed(2024)
 
-def train(audio_path, annotated_path, do_wandb, clean_audio):
+def train(audio_path, annotated_path, out_path, do_wandb, clean_audio, semantic_loss):
     if do_wandb:
         # start a new wandb run to track this script
         wandb.init(
@@ -61,7 +61,7 @@ def train(audio_path, annotated_path, do_wandb, clean_audio):
         seed = 2024, ###
         # learning_rate=2e-5, ###
         # optim = "paged_adamw_8bit", ###
-        output_dir="/scratch/users/nus/e1329380/cs5647/finetuned", ###
+        output_dir=out_path,
         per_device_train_batch_size=32, ### 16
         gradient_accumulation_steps=1, ### 2
         lr_scheduler_type="linear", ### linear, cosine
@@ -82,24 +82,37 @@ def train(audio_path, annotated_path, do_wandb, clean_audio):
         remove_unused_columns=False,
         label_names=["labels"],
         # load_best_model_at_end=True,
-        metric_for_best_model="wer",
-        greater_is_better=False,
+        metric_for_best_model="semantic_similarity" if semantic_loss else "wer",
+        greater_is_better=True if semantic_loss else False,
         save_strategy = "steps",
         save_steps = 10, ###
-        save_total_limit = 3, ###
+        save_total_limit = 4, ###
     )
 
     # Define trainer
-    trainer = Seq2SeqTrainer(
-        args=training_args,
-        model=model,
-        train_dataset=train_data,
-        eval_dataset=test_data,
-        data_collator=data_collator,
-        compute_metrics=compute_metrics,
-        tokenizer=processor.feature_extractor,
-        callbacks=[SavePeftModelCallback],
-    )
+    if semantic_loss:
+        trainer = CustomSeq2SeqTrainer(
+            args=training_args,
+            model=model,
+            train_dataset=train_data,
+            eval_dataset=test_data,
+            data_collator=data_collator,
+            compute_metrics=compute_metrics,
+            tokenizer=processor.feature_extractor,
+            callbacks=[SavePeftModelCallback],
+        )
+
+    else:
+        trainer = Seq2SeqTrainer(
+            args=training_args,
+            model=model,
+            train_dataset=train_data,
+            eval_dataset=test_data,
+            data_collator=data_collator,
+            compute_metrics=compute_metrics,
+            tokenizer=processor.feature_extractor,
+            callbacks=[SavePeftModelCallback],
+        )
     model.config.use_cache = False  # silence the warnings, reanable for inference
     trainer.train()
 
@@ -116,8 +129,8 @@ def predict(peft_path, audio_path, do_peft):
         model = PeftModel.from_pretrained(model, peft_path)
     else:
         model = WhisperForConditionalGeneration.from_pretrained(peft_path, device_map="auto")
-    tokenizer = WhisperTokenizer.from_pretrained(peft_path, language=language, task=task)
-    processor = WhisperProcessor.from_pretrained(peft_path, language=language, task=task)
+    tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-small", language=language, task=task)
+    processor = WhisperProcessor.from_pretrained("openai/whisper-small", language=language, task=task)
     feature_extractor = processor.feature_extractor
     forced_decoder_ids = processor.get_decoder_prompt_ids(language=language, task=task)
     pipeline = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=feature_extractor)
@@ -152,8 +165,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Training')
     parser.add_argument('--audio_path', type=str, help='path to folder containing audios')
     parser.add_argument('--annotated_path', type=str, help='path to file containing annotated data')
+    parser.add_argument('--out_path', type=str, help='path to where model will be saved')
     parser.add_argument("--wandb", action="store_true", help="whether to use wandb to track")
     parser.add_argument("--cleaned_audio", action="store_true", help="whether to use wandb to track")
+    parser.add_argument("--semantic_loss", action="store_true", help="whether to include semantic loss into the training loss")
     args = parser.parse_args()
 
-    train(args.audio_path, args.annotated_path, args.wandb, args.cleaned_audio)
+    train(args.audio_path, args.annotated_path, args.out_path, args.wandb, args.cleaned_audio, args.semantic_loss)

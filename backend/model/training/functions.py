@@ -1,13 +1,30 @@
 import evaluate, json, os, torch, torchaudio
+import numpy as np
 from dataclasses import dataclass
 from typing import Any, Dict, List, Union
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
-from transformers import TrainerCallback, TrainingArguments, TrainerState, TrainerControl, WhisperProcessor
+from transformers import TrainerCallback, TrainingArguments, TrainerState, TrainerControl, WhisperProcessor, Seq2SeqTrainer
+from sentence_transformers import SentenceTransformer
 from torch.utils.data import Dataset
 import torchaudio.transforms as T
+import torch.nn.functional as F
+from sklearn.metrics.pairwise import cosine_similarity
 
+# Load the SBERT model
+model_sbert = SentenceTransformer('uer/sbert-base-chinese-nli')
+
+# load whisper processor
 processor = WhisperProcessor.from_pretrained("openai/whisper-small", language="zh", task="transcribe") ### zh
+# load WER metric
 metric = evaluate.load("wer")
+
+# function to compute sentence embeddings
+def compute_sentence_embeddings(text_list):
+    with torch.no_grad():
+        sentence_embeddings = model_sbert.encode(text_list)
+        
+    return sentence_embeddings
+
 
 # Dataset: resample, get log mel, tokenize
 class MyDataset(Dataset):
@@ -61,8 +78,39 @@ class MyDataset(Dataset):
         return {"input_features": input_features,
                 "labels": labels}
 
+
+class CustomSeq2SeqTrainer(Seq2SeqTrainer):
+    def compute_loss(self, model, inputs, return_outputs=False):
+        # Forward pass to get predictions
+        outputs = model(**inputs)
+        logits = outputs.logits
+
+        # Get the CrossEntropy loss (as per the usual flow)
+        labels = inputs.get("labels")
+        ce_loss = F.cross_entropy(logits.view(-1, logits.size(-1)), labels.view(-1), ignore_index=-100)
+
+        # Decode the predicted and reference sequences for semantic similarity
+        pred_ids = torch.argmax(logits, dim=-1)
+        pred_str = processor.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
+        label_str = processor.tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+        # Compute semantic similarity score
+        pred_embeddings = compute_sentence_embeddings(pred_str)
+        ref_embeddings = compute_sentence_embeddings(label_str)
+        cosine_sim = cosine_similarity(pred_embeddings, ref_embeddings)
+        semantic_loss = (1-np.diag(cosine_sim)).mean() # (1-cosine_sim).mean()
+
+        # Combine CrossEntropy loss and semantic similarity (higher semantic similarity should reduce loss)
+        combined_loss = ce_loss + 2 * semantic_loss # Adjust the weight of semantic loss as needed
+
+        return (combined_loss, outputs) if return_outputs else combined_loss
+
+
 # Evaluation Metrics
 def compute_metrics(pred):
+    """
+    evaluates WER and semantic similarity score
+    """
     pred_ids = pred.predictions
     label_ids = pred.label_ids
 
@@ -73,9 +121,17 @@ def compute_metrics(pred):
     pred_str = processor.tokenizer.batch_decode(pred_ids, skip_special_tokens=True)
     label_str = processor.tokenizer.batch_decode(label_ids, skip_special_tokens=True)
 
+    # Compute Word Error Rate (WER)
     wer = 100 * metric.compute(predictions=pred_str, references=label_str)
 
-    return {"wer": wer}
+    # Compute semantic similarity using sentence embeddings
+    pred_embeddings = compute_sentence_embeddings(pred_str)
+    ref_embeddings = compute_sentence_embeddings(label_str)
+    cosine_sim = cosine_similarity(pred_embeddings, ref_embeddings)
+    semantic_similarity = torch.tensor(np.diag(cosine_sim).mean()) # torch.tensor(cosine_sim.mean())
+
+    return {"wer": wer, "semantic_similarity": semantic_similarity.item()}
+
 
 # Data collator
 # input_features are already padded, just need to batch them
@@ -107,6 +163,7 @@ class DataCollatorSpeechSeq2SeqWithPadding:
         batch["labels"] = labels
 
         return batch
+
 
 # It is also a good idea to write a custom TrainerCallback to save model checkpoints during training:
 class SavePeftModelCallback(TrainerCallback):
