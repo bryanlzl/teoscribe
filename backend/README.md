@@ -56,12 +56,17 @@ OMP_NUM_THREADS=1 python crawl.py --data_path "/scratch/users/nus/e1329380/cs564
 You can train either from Python:
 ``` python
 from finetune import *
-train(audio_path=, annotated_path=, wandb=, cleaned_audio=)
+train(audio_path=, annotated_path=, out_path=, wandb=, cleaned_audio=, semantic_loss=)
 ```
 or Command Line:
 ```
-# add --wandb, if logging to wandb, add --cleaned_audio, if training on cleaned audio
-python finetune.py --audio_path "/scratch/users/nus/e1329380/cs5647/crawled/audio" --annotated_path "/scratch/users/nus/e1329380/cs5647/crawled/dataset.json"
+# add --wandb, if logging to wandb, add --cleaned_audio, if training on cleaned audio, add --semantic_loss, if incorporate semantics into training
+python finetune.py --audio_path "/scratch/users/nus/e1329380/cs5647/crawled/audio" \
+        --annotated_path "/scratch/users/nus/e1329380/cs5647/crawled/dataset.json" \
+        --out_path "/scratch/users/nus/e1329380/cs5647/finetuned_linear_semantics_clean" \
+        --wandb \
+        --cleaned_audio \
+        --semantic_loss
 ```
 
 For prediction,
