@@ -1,24 +1,10 @@
 # Server/API dependencies
-fastapi
-uvicorn
+fastapi==0.115.3
+uvicorn==0.32.0
 
 # Model dependencies
-soundfile
-moviepy
-silero-vad
-paddlepaddle-gpu
-paddleocr
-python-Levenshtein
+transformers
+peft
 torch
 torchaudio
-datasets[audio]
-transformers
-accelerate
-evaluate
-jiwer
-bitsandbytes
-peft
-accelerate
 wandb
-noisereduce
-pydub
