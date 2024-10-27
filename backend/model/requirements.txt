@@ -1,0 +1,20 @@
+# Model dependencies
+soundfile
+moviepy
+silero-vad
+paddlepaddle-gpu
+paddleocr
+python-Levenshtein
+torch
+torchaudio
+datasets[audio]
+transformers
+accelerate
+evaluate
+jiwer
+bitsandbytes
+peft
+accelerate
+wandb
+noisereduce
+pydub
