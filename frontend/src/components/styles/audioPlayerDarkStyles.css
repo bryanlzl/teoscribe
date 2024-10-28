@@ -1,14 +1,14 @@
 .custom-audio-player {
-  background-color: transparent !important;
-  border: none;
-  box-shadow: none;
-  width: 85vw;
-  color: rgb(208, 208, 208) !important;
-  font-weight: bold;
+    background-color: transparent !important;
+    border: none;
+    box-shadow: none;
+    width: 85vw;
+    color: rgb(208, 208, 208) !important;
+    font-weight: bold;
 }
 
 .custom-audio-player .rhap_container {
-  color: white !important;
+    color: white !important;
 }
 
 .custom-audio-player .rhap_time,
@@ -17,29 +17,29 @@
 .custom-audio-player .rhap_volume-button,
 .custom-audio-player .rhap_repeat-button,
 .custom-audio-player .rhap_main-controls-button {
-  color: white !important;
+    color: white !important;
 }
 
 .custom-audio-player .rhap_progress-bar {
-  background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .custom-audio-player .rhap_progress-filled {
-  background-color: white;
+    background-color: white;
 }
 
 .custom-audio-player .rhap_volume-container,
 .custom-audio-player .rhap_repeat-button {
-  display: none !important;
+    display: none !important;
 }
 
 .custom-audio-player .rhap_play-pause-button,
 .custom-audio-player .rhap_main-controls-button {
-  width: 3rem;
-  height: 3rem;
+    width: 3rem;
+    height: 3rem;
 }
 
 .custom-audio-player .rhap_main-controls-button svg {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }

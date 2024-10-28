@@ -1,11 +1,11 @@
 export interface ILangConversionSettings {
-  mode: string;
-  sourceLanguage: string;
-  targetLanguage: string;
-  inputFormat: string;
-  outputFormat: string;
+    mode: string;
+    sourceLanguage: string;
+    targetLanguage: string;
+    inputFormat: string;
+    outputFormat: string;
 }
 
 export interface ILangConversionLibrary {
-  [sourceLanguage: string]: { [targetLanguage: string]: string[] };
+    [sourceLanguage: string]: { [targetLanguage: string]: string[] };
 }
