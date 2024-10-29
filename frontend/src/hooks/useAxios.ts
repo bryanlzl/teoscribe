@@ -4,41 +4,45 @@ import { API_BASE_URL, API_PORT } from '../config/env';
 
 type TUseAxiosReturn<T> = {
     sendRequest: (config: AxiosRequestConfig) => Promise<void>;
-    loading: boolean;
+    awaitResponse: boolean;
     error: string | null;
     responseData: T | null;
 };
 
 const useAxios = <T>(): TUseAxiosReturn<T> => {
-    const [loading, setLoading] = useState<boolean>(false);
+    const [awaitResponse, setAwaitResponse] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [responseData, setResponseData] = useState<T | null>(null);
 
     const baseConfig: AxiosRequestConfig = { url: API_BASE_URL + ':' + API_PORT };
 
-    const sendRequest = useCallback(async (config: AxiosRequestConfig): Promise<void> => {
-        setLoading(true);
-        setError(null);
+    const sendRequest = useCallback(
+        async (config: AxiosRequestConfig): Promise<void> => {
+            setAwaitResponse(true);
+            setError(null);
+            setResponseData(null);
 
-        try {
-            const adjustedConfig: AxiosRequestConfig = {
-                ...config,
-                url: `${baseConfig.url}${config.url ?? ''}`,
-            };
-            const response: AxiosResponse<T> = await axios(adjustedConfig);
-            setResponseData(response.data);
-        } catch (err) {
-            if (axios.isAxiosError(err)) {
-                setError(err.message);
-            } else {
-                setError('An unexpected error occurred');
+            try {
+                const adjustedConfig: AxiosRequestConfig = {
+                    ...config,
+                    url: `${baseConfig.url}${config.url ?? ''}`,
+                };
+                const response: AxiosResponse<T> = await axios(adjustedConfig);
+                setResponseData(response.data);
+            } catch (err) {
+                if (axios.isAxiosError(err)) {
+                    setError(err.message);
+                } else {
+                    setError('An unexpected error occurred');
+                }
+            } finally {
+                setAwaitResponse(false);
             }
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+        },
+        [baseConfig.url],
+    );
 
-    return { sendRequest, loading, error, responseData };
+    return { sendRequest, awaitResponse, error, responseData };
 };
 
 export default useAxios;

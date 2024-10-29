@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useAppViewState from '../stores/useAppViewState';
 import SelectLangConversion from './SelectLangConversion';
 import { MicrophoneIcon } from '@heroicons/react/24/solid';
@@ -12,10 +12,11 @@ const LayoutContent = (): JSX.Element => {
     const { setConversionResults } = useLangConversion();
     const [isLoadingAnimate, setIsLoadingAnimate] = useState<boolean>(false);
 
-    const { sendRequest, responseData, error } = useAxios<ITranscriptionResponse>();
+    const { sendRequest, awaitResponse, responseData, error } = useAxios<ITranscriptionResponse>();
 
     // Just triggers sliding up of ResultsPanel
-    const runTranscriptionModel = async (): Promise<void> => {
+    const handleTranscription = async (): Promise<void> => {
+        setIsLoadingAnimate(true);
         await sendRequest({
             url: '/transcribe',
             method: 'POST',
@@ -42,29 +43,31 @@ const LayoutContent = (): JSX.Element => {
         });
     };
 
-    const handleButtonClick = async (): Promise<void> => {
-        await runTranscriptionModel();
-        // After runTranscriptionModel completes, get either error or responseData
-        const postAnimationDuration: number = responseData !== null ? 650 : 0;
-        setTimeout(() => {
-            if (responseData !== null) {
-                handleTranscriptionResults(responseData.transcribed_text);
-            } else if (error !== null) {
-                setIsLoadingAnimate(false);
-            }
+    // Await and handle /transcribe endpoint response
+    useEffect(() => {
+        if (!awaitResponse && (responseData !== null || error !== null)) {
+            const postAnimationDuration: number = responseData !== null ? 650 : 0;
             setTimeout(() => {
-                setIsLoadingAnimate(false);
-                console.log(responseData);
-            }, postAnimationDuration);
-        }, 1000);
-    };
+                if (responseData !== null) {
+                    handleTranscriptionResults(responseData.transcribed_text);
+                    console.log('response data:', responseData);
+                } else if (error !== null) {
+                    setIsLoadingAnimate(false);
+                    console.error('transcription endpoint failed');
+                }
+                setTimeout(() => {
+                    setIsLoadingAnimate(false);
+                }, postAnimationDuration);
+            }, 1000);
+        }
+    }, [awaitResponse, responseData, error]);
 
     return (
         <div className="flex flex-col justify-center items-center w-[100%] h-[100%]">
             <SelectLangConversion />
             <div className="flex flex-col justify-center items-center w-fit h-[100%] space-y-[1.5rem]">
                 <h2 className="text-center opacity-75">Tap to speak</h2>
-                <button className="btn btn-circle w-[15.5rem] h-[15.5rem] bg-primary" onClick={handleButtonClick}>
+                <button className="btn btn-circle w-[15.5rem] h-[15.5rem] bg-primary" onClick={handleTranscription}>
                     {isLoadingAnimate ? (
                         <RingLoader
                             loading={true}
