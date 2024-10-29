@@ -6,17 +6,34 @@ import { RingLoader } from 'react-spinners';
 import useAxios from '../hooks/useAxios';
 import { ITranscriptionResponse } from '../definitions/endpoints';
 import useLangConversion from '../stores/useLangConversion';
+import { useAudioRecorder } from 'react-audio-voice-recorder';
 
 const LayoutContent = (): JSX.Element => {
     const { appViewState, setAppViewState } = useAppViewState();
     const { setConversionResults } = useLangConversion();
     const [isLoadingAnimate, setIsLoadingAnimate] = useState<boolean>(false);
 
+    const { startRecording, stopRecording, recordingBlob, isRecording, recordingTime, mediaRecorder } =
+        useAudioRecorder();
+
     const { sendRequest, awaitResponse, responseData, error } = useAxios<ITranscriptionResponse>();
+
+    const toggleRecording = (): void => {
+        if (!isRecording) {
+            startRecording();
+            setIsLoadingAnimate(true);
+        } else {
+            stopRecording();
+            handleTranscription();
+        }
+    };
+
+    useEffect(() => {
+        console.log(recordingBlob);
+    }, [recordingBlob]);
 
     // Just triggers sliding up of ResultsPanel
     const handleTranscription = async (): Promise<void> => {
-        setIsLoadingAnimate(true);
         await sendRequest({
             url: '/transcribe',
             method: 'POST',
@@ -50,7 +67,6 @@ const LayoutContent = (): JSX.Element => {
             setTimeout(() => {
                 if (responseData !== null) {
                     handleTranscriptionResults(responseData.transcribed_text);
-                    console.log('response data:', responseData);
                 } else if (error !== null) {
                     setIsLoadingAnimate(false);
                     console.error('transcription endpoint failed');
@@ -67,7 +83,7 @@ const LayoutContent = (): JSX.Element => {
             <SelectLangConversion />
             <div className="flex flex-col justify-center items-center w-fit h-[100%] space-y-[1.5rem]">
                 <h2 className="text-center opacity-75">Tap to speak</h2>
-                <button className="btn btn-circle w-[15.5rem] h-[15.5rem] bg-primary" onClick={handleTranscription}>
+                <button className="btn btn-circle w-[15.5rem] h-[15.5rem] bg-primary" onClick={toggleRecording}>
                     {isLoadingAnimate ? (
                         <RingLoader
                             loading={true}
