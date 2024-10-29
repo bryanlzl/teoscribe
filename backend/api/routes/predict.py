@@ -73,7 +73,7 @@ async def transcribe_audio(transcribe_request: TranscribeAudioReqBody):
             status_code=200,
             content={
                 "success": True,
-                "transcribedText": static_text
+                "transcribed_text": static_text
             }
         )
     except Exception as e:

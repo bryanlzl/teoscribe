@@ -1,5 +1,5 @@
 import { IAppViewState } from './appViewStateTypes';
-import { ILangConversionSettings } from './langConversionTypes';
+import { IConversionResults, ILangConversionSettings } from './langConversionTypes';
 
 // Store types
 export interface IThemeStore {
@@ -13,6 +13,8 @@ export interface IAppViewStateStore {
 export interface ILangConversionStore {
     conversionSettings: ILangConversionSettings;
     setConversionSettings: (conversionSettings: ILangConversionSettings) => void;
+    conversionResults: IConversionResults;
+    setConversionResults: (conversionResults: IConversionResults) => void;
 }
 
 // Zustand hook types

@@ -1,11 +1,13 @@
 # Server/API dependencies
+# USE PYTHON 3.9.13
 fastapi==0.115.3
 uvicorn==0.32.0
+python-dotenv
 
 # Model dependencies
-transformers
-peft
-torch
-torchaudio
+transformers==4.45.2
+peft==0.13.2
+torch==2.4.1
+torchaudio==2.4.1
 wandb
 ffmpeg
