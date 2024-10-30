@@ -9,14 +9,13 @@ import useLangConversion from '../stores/useLangConversion';
 import { useAudioRecorder } from 'react-audio-voice-recorder';
 
 const LayoutContent = (): JSX.Element => {
-    const { appViewState, setAppViewState } = useAppViewState();
-    const { setConversionResults } = useLangConversion();
     const [isLoadingAnimate, setIsLoadingAnimate] = useState<boolean>(false);
 
-    const { startRecording, stopRecording, recordingBlob, isRecording, recordingTime, mediaRecorder } =
-        useAudioRecorder();
-
+    const { appViewState, setAppViewState } = useAppViewState();
+    const { setConversionResults } = useLangConversion();
     const { sendRequest, awaitResponse, responseData, error } = useAxios<ITranscriptionResponse>();
+
+    const { startRecording, stopRecording, recordingBlob, isRecording, recordingTime } = useAudioRecorder();
 
     const toggleRecording = (): void => {
         if (!isRecording) {
@@ -32,24 +31,35 @@ const LayoutContent = (): JSX.Element => {
         console.log(recordingBlob);
     }, [recordingBlob]);
 
-    // Just triggers sliding up of ResultsPanel
+    // convert blob to mp3 file -> send mp3 to transcribe endpoint
     const handleTranscription = async (): Promise<void> => {
-        await sendRequest({
-            url: '/transcribe',
-            method: 'POST',
-            data: {
-                audio_url: 'test_audio_url.com',
-                dialect: 'teochew',
-            },
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        const formData = new FormData();
+        formData.append('dialect', 'teochew');
+
+        // poll until recordingBlob is a blob
+        const pollInterval = setInterval(() => {
+            if (recordingBlob instanceof Blob) {
+                formData.append('audio_blob', recordingBlob, 'audio.webm');
+                clearInterval(pollInterval);
+                sendRequest({
+                    url: '/transcribe',
+                    method: 'POST',
+                    data: formData,
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+            }
+        }, 300);
     };
 
     const handleTranscriptionResults = (transcriptionResult: string): void => {
         // Set conversion results
-        setConversionResults({ transcriptionResult: transcriptionResult, translatedResult: null });
+        setConversionResults({
+            recordingDuration: recordingTime,
+            transcriptionResult: transcriptionResult,
+            translatedResult: null,
+        });
         // Set app state to trigger result panel
         setAppViewState({
             ...appViewState,
@@ -62,6 +72,7 @@ const LayoutContent = (): JSX.Element => {
 
     // Await and handle /transcribe endpoint response
     useEffect(() => {
+        console.log(responseData);
         if (!awaitResponse && (responseData !== null || error !== null)) {
             const postAnimationDuration: number = responseData !== null ? 650 : 0;
             setTimeout(() => {
@@ -74,7 +85,7 @@ const LayoutContent = (): JSX.Element => {
                 setTimeout(() => {
                     setIsLoadingAnimate(false);
                 }, postAnimationDuration);
-            }, 1000);
+            }, 500);
         }
     }, [awaitResponse, responseData, error]);
 

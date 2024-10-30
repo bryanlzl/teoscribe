@@ -7,6 +7,7 @@ export interface ILangConversionSettings {
 }
 
 export interface IConversionResults {
+    recordingDuration: number | null;
     transcriptionResult: string | null;
     translatedResult: string | null;
 }

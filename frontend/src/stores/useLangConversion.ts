@@ -12,6 +12,7 @@ const useLangConversionStore = create<ILangConversionStore>((set) => ({
     },
     setConversionSettings: (conversionSettings: ILangConversionSettings) => set({ conversionSettings }),
     conversionResults: {
+        recordingDuration: null,
         transcriptionResult: null,
         translatedResult: null,
     },

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from starlette.responses import JSONResponse
 from transformers import WhisperForConditionalGeneration, WhisperTokenizer, WhisperProcessor, AutomaticSpeechRecognitionPipeline
 from peft import PeftConfig, PeftModel
@@ -60,13 +60,13 @@ async def server_status():
         )
 
 @router.post("/transcribe", summary="Transcribes an audio input", description="Transcribe an audio input (using the model) into its character/text form")
-async def transcribe_audio(transcribe_request: TranscribeAudioReqBody):
+async def transcribe_audio(audio_blob: UploadFile = File(...), dialect: str = Form(...)):
     """    
     Returns a string of transcribed characters/text based on an audio input
     """
     try:
-        logging.info("transcribe_request audio input url:" + transcribe_request.audio_url)
-        logging.info("transcribe_request dialect:" + transcribe_request.dialect)
+        logging.info("transcribe_request received" + audio_blob.content_type)
+        logging.info("transcribe_request dialect:" + dialect)
         
         static_text = "谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢"
         return JSONResponse(

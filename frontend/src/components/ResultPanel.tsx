@@ -12,7 +12,7 @@ interface ICopyState {
 }
 
 const ResultPanel = () => {
-    const { conversionSettings } = useLangConversion();
+    const { conversionSettings, conversionResults } = useLangConversion();
     const { appViewState, setAppViewState } = useAppViewState();
     const { theme } = useTheme();
 
@@ -95,7 +95,11 @@ const ResultPanel = () => {
                         {/* Copy function */}
                         <div className="absolute top-[3.15rem] flex flex-row justify-center items-center opacity-80 ml-[1rem] space-x-2">
                             <h3>Duration:</h3>
-                            <p className="text-start">1 min 32 sec</p>
+                            <p className="text-start">
+                                {conversionResults.recordingDuration !== null
+                                    ? conversionResults.recordingDuration
+                                    : 'unknown'}
+                            </p>
                         </div>
                         <div className="absolute top-[3.15rem] right-[2rem]">
                             {copyState.textTranscribed ? (
@@ -122,12 +126,11 @@ const ResultPanel = () => {
                                 className={`textarea h-[25vh] py-[0.25rem] w-[100%] text-lg ${
                                     theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                 }`}
-                                defaultValue="谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么
-                  谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢
-                  谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢
-                  什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什
-                  么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么
-                  谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么​"
+                                defaultValue={
+                                    conversionResults.transcriptionResult !== null
+                                        ? conversionResults.transcriptionResult
+                                        : ''
+                                }
                                 ref={textTranscribedRef}
                             />
                         </div>

@@ -3,6 +3,7 @@
 fastapi==0.115.3
 uvicorn==0.32.0
 python-dotenv
+python-multipart
 
 # Model dependencies
 transformers==4.45.2
