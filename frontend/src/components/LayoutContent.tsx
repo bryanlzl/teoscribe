@@ -1,37 +1,69 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
 import useAppViewState from '../stores/useAppViewState';
 import SelectLangConversion from './SelectLangConversion';
-import { MicrophoneIcon } from '@heroicons/react/24/solid';
-import { RingLoader } from 'react-spinners';
 import useAxios from '../hooks/useAxios';
 import { ITranscriptionResponse } from '../definitions/endpoints';
 import useLangConversion from '../stores/useLangConversion';
-import { useAudioRecorder } from 'react-audio-voice-recorder';
+
+import RecordRTC from 'recordrtc';
+import { MicrophoneIcon } from '@heroicons/react/24/solid';
+import { RingLoader } from 'react-spinners';
 
 const LayoutContent = (): JSX.Element => {
-    const [isLoadingAnimate, setIsLoadingAnimate] = useState<boolean>(false);
+    const [isRecordingAnimate, setIsRecordingAnimate] = useState<boolean>(false);
+    const [isTranscribingAnimate, setIsTranscribingAnimate] = useState<boolean>(false);
+
+    // --------- recordRTC related hooks --------- //
+    const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
+    const audioStreamRef = useRef<MediaStream | null>(null);
+    const audioRecorderRef = useRef<RecordRTC | null>(null);
+    // --------- recordRTC end -----------//
 
     const { appViewState, setAppViewState } = useAppViewState();
     const { setConversionResults } = useLangConversion();
+
     const { sendRequest, awaitResponse, responseData, error } = useAxios<ITranscriptionResponse>();
 
-    const { startRecording, stopRecording, recordingBlob, isRecording, recordingTime } = useAudioRecorder();
+    const startAudioRecording = async (): Promise<void> => {
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioStreamRef.current = audioStream;
+        audioRecorderRef.current = new RecordRTC(audioStream, {
+            type: 'audio',
+            mimeType: 'audio/wav',
+            recorderType: RecordRTC.StereoAudioRecorder,
+            desiredSampRate: 44100,
+        });
+        audioRecorderRef.current.startRecording();
+    };
 
-    const toggleRecording = async (): Promise<void> => {
-        if (!isRecording) {
-            startRecording();
-            setIsLoadingAnimate(true);
-        } else {
-            stopRecording();
-            handleTranscription();
+    const stopAudioRecording = (): void => {
+        if (audioRecorderRef.current) {
+            audioRecorderRef.current.stopRecording(() => {
+                setRecordedAudioBlob(audioRecorderRef.current!.getBlob());
+            });
+        }
+        if (audioStreamRef.current) {
+            audioStreamRef.current.getTracks().forEach((track) => track.stop());
+            audioStreamRef.current = null;
         }
     };
 
-    // convert blob to mp3 file -> send mp3 to transcribe endpoint
-    const handleTranscription = (): void => {
+    // const downloadRecordedBlob = (): void => {
+    //     invokeSaveAsDialog(recordedAudioBlob as Blob);
+    // };
+
+    const getAudioDuration = async (audioBlob: Blob): Promise<number> => {
+        const audioContext = new AudioContext();
+        const arrayBuffer = await audioBlob.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        return audioBuffer.duration;
+    };
+
+    const sendForTranscription = (): void => {
         const formData = new FormData();
         formData.append('dialect', 'teochew');
-        formData.append('audio_blob', recordingBlob as Blob, 'audio.webm');
+        formData.append('audio_blob', recordedAudioBlob as Blob, 'audio.wav');
 
         sendRequest({
             url: '/transcribe',
@@ -43,10 +75,21 @@ const LayoutContent = (): JSX.Element => {
         });
     };
 
-    const handleTranscriptionResults = (transcriptionResult: string): void => {
+    const toggleRecording = async (): Promise<void> => {
+        if (!isRecordingAnimate) {
+            startAudioRecording();
+            setIsRecordingAnimate(true);
+        } else {
+            stopAudioRecording();
+            // Send to backend for model to transcribe audio input
+        }
+    };
+
+    const handleTranscriptionSaves = async (transcriptionResult: string): Promise<void> => {
+        const recordDuration: number = await getAudioDuration(recordedAudioBlob as Blob);
         // Set conversion results
         setConversionResults({
-            recordingDuration: recordingTime,
+            recordingDuration: recordDuration,
             transcriptionResult: transcriptionResult,
             translatedResult: null,
         });
@@ -60,29 +103,29 @@ const LayoutContent = (): JSX.Element => {
         });
     };
 
-    // Await for recorded audio to become blob
+    // Trigger transcription backend call
     useEffect(() => {
-        if (recordingBlob instanceof Blob) {
-            handleTranscription();
+        if ((recordedAudioBlob as Blob) !== null) {
+            sendForTranscription();
+            setIsRecordingAnimate(false);
+            setIsTranscribingAnimate(true);
+            console.log(recordedAudioBlob);
         }
-    }, [recordingBlob]);
+    }, [recordedAudioBlob]);
 
-    // Await and handle /transcribe endpoint response
+    // Trigger /transcribe endpoint response
     useEffect(() => {
-        // console.log('asdasdasdasdasd');
         if (!awaitResponse && (responseData !== null || error !== null)) {
-            // console.log('bring up loading');
             const postAnimationDuration: number = responseData !== null ? 650 : 0;
             setTimeout(() => {
                 if (responseData !== null) {
-                    // console.log('repsonse successful');
-                    handleTranscriptionResults(responseData.transcribed_text);
+                    handleTranscriptionSaves(responseData.transcribed_text);
                 } else if (error !== null) {
-                    setIsLoadingAnimate(false);
+                    setIsTranscribingAnimate(false);
                     console.error('transcription endpoint failed');
                 }
                 setTimeout(() => {
-                    setIsLoadingAnimate(false);
+                    setIsTranscribingAnimate(false);
                 }, postAnimationDuration);
             }, 500);
         }
@@ -94,7 +137,9 @@ const LayoutContent = (): JSX.Element => {
             <div className="flex flex-col justify-center items-center w-fit h-[100%] space-y-[1.5rem]">
                 <h2 className="text-center opacity-75">Tap to speak</h2>
                 <button className="btn btn-circle w-[15.5rem] h-[15.5rem] bg-primary" onClick={toggleRecording}>
-                    {isLoadingAnimate ? (
+                    {isRecordingAnimate ? (
+                        <span className="loading loading-ring w-[85%]" />
+                    ) : isTranscribingAnimate ? (
                         <RingLoader
                             loading={true}
                             color="#88B0A3"
