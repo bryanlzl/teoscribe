@@ -17,7 +17,7 @@ const LayoutContent = (): JSX.Element => {
 
     const { startRecording, stopRecording, recordingBlob, isRecording, recordingTime } = useAudioRecorder();
 
-    const toggleRecording = (): void => {
+    const toggleRecording = async (): Promise<void> => {
         if (!isRecording) {
             startRecording();
             setIsLoadingAnimate(true);
@@ -27,30 +27,20 @@ const LayoutContent = (): JSX.Element => {
         }
     };
 
-    useEffect(() => {
-        console.log(recordingBlob);
-    }, [recordingBlob]);
-
     // convert blob to mp3 file -> send mp3 to transcribe endpoint
-    const handleTranscription = async (): Promise<void> => {
+    const handleTranscription = (): void => {
         const formData = new FormData();
         formData.append('dialect', 'teochew');
+        formData.append('audio_blob', recordingBlob as Blob, 'audio.webm');
 
-        // poll until recordingBlob is a blob
-        const pollInterval = setInterval(() => {
-            if (recordingBlob instanceof Blob) {
-                formData.append('audio_blob', recordingBlob, 'audio.webm');
-                clearInterval(pollInterval);
-                sendRequest({
-                    url: '/transcribe',
-                    method: 'POST',
-                    data: formData,
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-            }
-        }, 300);
+        sendRequest({
+            url: '/transcribe',
+            method: 'POST',
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     };
 
     const handleTranscriptionResults = (transcriptionResult: string): void => {
@@ -70,13 +60,22 @@ const LayoutContent = (): JSX.Element => {
         });
     };
 
+    // Await for recorded audio to become blob
+    useEffect(() => {
+        if (recordingBlob instanceof Blob) {
+            handleTranscription();
+        }
+    }, [recordingBlob]);
+
     // Await and handle /transcribe endpoint response
     useEffect(() => {
-        console.log(responseData);
+        // console.log('asdasdasdasdasd');
         if (!awaitResponse && (responseData !== null || error !== null)) {
+            // console.log('bring up loading');
             const postAnimationDuration: number = responseData !== null ? 650 : 0;
             setTimeout(() => {
                 if (responseData !== null) {
+                    // console.log('repsonse successful');
                     handleTranscriptionResults(responseData.transcribed_text);
                 } else if (error !== null) {
                     setIsLoadingAnimate(false);
