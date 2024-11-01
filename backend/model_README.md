@@ -1,7 +1,7 @@
 ## 1) Crawl Teochew videos
-**We downloaded a whole bunch of cropped Teochew videos at:** https://drive.google.com/drive/folders/1D_LhdBszNeJllwSA4Y1OnY2oLTcEvt2G (Mount to access???)
+**We downloaded a whole bunch of cropped Teochew videos at:** https://drive.google.com/drive/folders/1D_LhdBszNeJllwSA4Y1OnY2oLTcEvt2G
 
-**We store our data at:** https://drive.google.com/drive/folders/1D_LhdBszNeJllwSA4Y1OnY2oLTcEvt2G (Mount to access???)
+**We store our dataset in this format:**
 ```
 crawled/
     ├── audio/
@@ -11,7 +11,7 @@ crawled/
     └── dataset.json
 ```
 
-**We organise the data into the following format:**
+**We organise the annotated data into the following format:**
 - Audio files: Store each audio clip as a file in a folder.
 - Timestamps: Store the start and end times for the audio clips.
 - Subtitles: Store the associated subtitles

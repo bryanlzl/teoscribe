@@ -12,12 +12,12 @@ torch.manual_seed(2024)
 random.seed(2024)
 np.random.seed(2024)
 
-def train(audio_path, annotated_path, out_path, do_wandb, clean_audio, semantic_loss):
+def train(audio_path, train_path, test_path, out_path, do_wandb, clean_audio, semantic_loss):
     if do_wandb:
         # start a new wandb run to track this script
         wandb.init(
             # set the wandb project where this run will be logged
-            project="whisper_finetune_teochew",
+            project="whisper_finetune_teochew_final",
             # # track hyperparameters and run metadata
             # config={
             # "learning_rate": 0.02,
@@ -28,11 +28,14 @@ def train(audio_path, annotated_path, out_path, do_wandb, clean_audio, semantic_
         )
 
     # Data preparation (e.g., 80% train, 20% test), randomly split the dataset
-    data = MyDataset(audio_path, annotated_path, clean_audio)
-    train_size = int(0.8 * len(data))
-    test_size = len(data) - train_size
-    train_data, test_data = random_split(data, [train_size, test_size])
-    print(f"Number of train data: {train_size}\nNumber of val data: {test_size}...")
+    # data = MyDataset(audio_path, annotated_path, clean_audio)
+    # train_size = int(0.8 * len(data))
+    # test_size = len(data) - train_size
+    # train_data, test_data = random_split(data, [train_size, test_size])
+    # print(f"Number of train data: {train_size}\nNumber of val data: {test_size}...")
+    train_data = MyDataset(audio_path, train_path, clean_audio)
+    test_data = MyDataset(audio_path, test_path, clean_audio)
+    print(f"Number of train data: {len(train_data)}\nNumber of val data: {len(test_data)}")
 
     # processor = WhisperProcessor.from_pretrained("openai/whisper-small", language="zh", task="transcribe") ### zh
 
@@ -86,7 +89,7 @@ def train(audio_path, annotated_path, out_path, do_wandb, clean_audio, semantic_
         greater_is_better=True if semantic_loss else False,
         save_strategy = "steps",
         save_steps = 10, ###
-        save_total_limit = 4, ###
+        save_total_limit = 10, ###
     )
 
     # Define trainer
@@ -164,11 +167,12 @@ def predict_api(pipeline, audio_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Training')
     parser.add_argument('--audio_path', type=str, help='path to folder containing audios')
-    parser.add_argument('--annotated_path', type=str, help='path to file containing annotated data')
+    parser.add_argument('--train_path', type=str, help='path to file containing annotated train data')
+    parser.add_argument('--test_path', type=str, help='path to file containing annotated test data')
     parser.add_argument('--out_path', type=str, help='path to where model will be saved')
     parser.add_argument("--wandb", action="store_true", help="whether to use wandb to track")
     parser.add_argument("--cleaned_audio", action="store_true", help="whether to use wandb to track")
     parser.add_argument("--semantic_loss", action="store_true", help="whether to include semantic loss into the training loss")
     args = parser.parse_args()
 
-    train(args.audio_path, args.annotated_path, args.out_path, args.wandb, args.cleaned_audio, args.semantic_loss)
+    train(args.audio_path, args.train_path, args.test_path, args.out_path, args.wandb, args.cleaned_audio, args.semantic_loss)
