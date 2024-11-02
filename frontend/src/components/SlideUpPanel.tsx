@@ -1,5 +1,5 @@
-import React, { FC, Dispatch, SetStateAction, useState } from 'react';
 import { ArrowDownIcon } from '@heroicons/react/24/outline';
+import React, { Dispatch, FC, SetStateAction, useState } from 'react';
 import useAppViewState from '../stores/useAppViewState';
 
 interface ISlidingUpPanelProps {
@@ -10,6 +10,9 @@ interface ISlidingUpPanelProps {
     offsetHeight: number;
     isEnabled: boolean;
     setIsEnabled: Dispatch<SetStateAction<boolean>>;
+    styles?: {
+        zIndex?: number | 'auto';
+    };
 }
 
 const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({
@@ -19,6 +22,7 @@ const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({
     isStacked,
     offsetHeight,
     isEnabled,
+    styles = { zIndex: 'auto' },
 }) => {
     const { appViewState, setAppViewState } = useAppViewState();
 
@@ -51,6 +55,7 @@ const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({
             style={{
                 height: isEnabled ? `calc(100vh - ${offsetHeight}rem)` : '0',
                 boxShadow: '0 -0.5rem 1rem rgba(0, 0, 0, 0.15)',
+                ...styles,
             }}
             className="absolute bottom-0 w-full bg-secondary text-center transition-all duration-500 ease-in-out overflow-hidden"
         >
