@@ -43,12 +43,21 @@ crawled/
 - Image enhancement: increased contrast
 
 #### Prepare Data
-``` 2>&1 | tee crawl.log
+To crawl,
+```
 # --audio_only, if crawling for audio only (no subtitle)
 OMP_NUM_THREADS=1 python crawl.py --data_path "/scratch/users/nus/e1329380/cs5647/downloaded" --crawled_path "/scratch/users/nus/e1329380/cs5647/crawled"
 ```
+To post-process data,
+```
+python postprocess.py --input_json "/scratch/users/nus/e1329380/cs5647/crawled/dataset.json" --output_json "/scratch/users/nus/e1329380/cs5647/crawled/dataset_processed.json"
+```
 
 ## 2) Model Training
+To split labelled crawled data,
+```
+python split.py --data_path "/scratch/users/nus/e1329380/cs5647/crawled/dataset_processed.json" --train_path "/scratch/users/nus/e1329380/cs5647/crawled/train.json" --test_path "/scratch/users/nus/e1329380/cs5647/crawled/test.json"
+```
 #### Finetune Whisper (teacher model)
 - Currently, I fixed the training hyperparameters.
 - PEFT LoRA is used to fine-tune Whisper-small model.
