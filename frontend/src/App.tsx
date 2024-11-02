@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import useTheme from './stores/useTheme';
 import LayoutContent from './components/LayoutContent';
 import LayoutHeader from './components/LayoutHeader';
+import useTheme from './stores/useTheme';
 // import LayoutFooter from './components/LayoutFooter';
-import ResultPanel from './components/ResultPanel';
 import PlaybackPanel from './components/PlaybackPanel';
+import ResultPanel from './components/ResultPanel';
 
 const App = (): JSX.Element => {
     const { theme } = useTheme();

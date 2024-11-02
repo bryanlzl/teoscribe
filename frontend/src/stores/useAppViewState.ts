@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { IAppViewStateStore } from '../types/storeTypes';
 import { IAppViewState } from '../types/appViewStateTypes';
+import { IAppViewStateStore } from '../types/storeTypes';
 
 const useAppViewStateStore = create<IAppViewStateStore>((set) => ({
     appViewState: {

@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { useCallback, useState } from 'react';
 import { API_BASE_URL, API_PORT } from '../config/env';
 
 type TUseAxiosReturn<T> = {
