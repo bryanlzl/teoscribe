@@ -15,3 +15,7 @@ export interface IConversionResults {
 export interface ILangConversionLibrary {
     [sourceLanguage: string]: { [targetLanguage: string]: string[] };
 }
+
+export interface ILangCodeDict {
+    [languageFullName: string]: string;
+}

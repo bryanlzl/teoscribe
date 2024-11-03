@@ -1,30 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
 
-import useAppViewState from '../stores/useAppViewState';
-import SelectLangConversion from './SelectLangConversion';
-import useAxios from '../hooks/useAxios';
 import { ITranscriptionResponse } from '../definitions/endpoints';
+import useAxios from '../hooks/useAxios';
+import useAppViewState from '../stores/useAppViewState';
 import useLangConversion from '../stores/useLangConversion';
+import SelectLangConversion from './SelectLangConversion';
 
-import RecordRTC from 'recordrtc';
 import { MicrophoneIcon } from '@heroicons/react/24/solid';
 import { RingLoader } from 'react-spinners';
+import RecordRTC from 'recordrtc';
 
 const LayoutContent = (): JSX.Element => {
+    const { appViewState, setAppViewState } = useAppViewState();
+    const { setConversionResults } = useLangConversion();
+    const { sendRequest, awaitResponse, responseData, error } = useAxios<ITranscriptionResponse>();
+
     const [isRecordingAnimate, setIsRecordingAnimate] = useState<boolean>(false);
     const [isTranscribingAnimate, setIsTranscribingAnimate] = useState<boolean>(false);
 
-    // --------- recordRTC related hooks --------- //
+    // --------- recordRTC hooks --------- //
     const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
     const audioStreamRef = useRef<MediaStream | null>(null);
     const audioRecorderRef = useRef<RecordRTC | null>(null);
     // --------- recordRTC end -----------//
 
-    const { appViewState, setAppViewState } = useAppViewState();
-    const { setConversionResults } = useLangConversion();
-
-    const { sendRequest, awaitResponse, responseData, error } = useAxios<ITranscriptionResponse>();
-
+    // RECORDRTC METHODS: To start/stop/get recorded audio in .wav (PCM codec)
     const startAudioRecording = async (): Promise<void> => {
         const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioStreamRef.current = audioStream;
@@ -36,7 +36,6 @@ const LayoutContent = (): JSX.Element => {
         });
         audioRecorderRef.current.startRecording();
     };
-
     const stopAudioRecording = (): void => {
         if (audioRecorderRef.current) {
             audioRecorderRef.current.stopRecording(() => {
@@ -48,11 +47,6 @@ const LayoutContent = (): JSX.Element => {
             audioStreamRef.current = null;
         }
     };
-
-    // const downloadRecordedBlob = (): void => {
-    //     invokeSaveAsDialog(recordedAudioBlob as Blob);
-    // };
-
     const getAudioDuration = async (audioBlob: Blob): Promise<number> => {
         const audioContext = new AudioContext();
         const arrayBuffer = await audioBlob.arrayBuffer();
@@ -60,6 +54,7 @@ const LayoutContent = (): JSX.Element => {
         return audioBuffer.duration;
     };
 
+    // ENDPOINT CALL: Send .wav audio blob to backend for transcription
     const sendForTranscription = (): void => {
         const formData = new FormData();
         formData.append('dialect', 'teochew');
@@ -75,6 +70,7 @@ const LayoutContent = (): JSX.Element => {
         });
     };
 
+    // REACT HOOK METHOD: Initiate/stop audio recording -> transcription sequence
     const toggleRecording = async (): Promise<void> => {
         if (!isRecordingAnimate) {
             startAudioRecording();
@@ -85,6 +81,7 @@ const LayoutContent = (): JSX.Element => {
         }
     };
 
+    // ZUSTAND METHOD: Save transcription results and app view state in zustand stores
     const handleTranscriptionSaves = async (transcriptionResult: string): Promise<void> => {
         const recordDuration: number = await getAudioDuration(recordedAudioBlob as Blob);
         // Set conversion results
@@ -102,27 +99,25 @@ const LayoutContent = (): JSX.Element => {
             },
         });
     };
-
     // Trigger transcription backend call
     useEffect(() => {
         if ((recordedAudioBlob as Blob) !== null) {
             sendForTranscription();
             setIsRecordingAnimate(false);
             setIsTranscribingAnimate(true);
-            console.log(recordedAudioBlob);
         }
     }, [recordedAudioBlob]);
-
-    // Trigger /transcribe endpoint response
+    // Trigger after receiving response from /transcribe endpoint
     useEffect(() => {
         if (!awaitResponse && (responseData !== null || error !== null)) {
             const postAnimationDuration: number = responseData !== null ? 650 : 0;
             setTimeout(() => {
                 if (responseData !== null) {
                     handleTranscriptionSaves(responseData.transcribed_text);
+                    console.log('/transcription endpoint success');
                 } else if (error !== null) {
                     setIsTranscribingAnimate(false);
-                    console.error('transcription endpoint failed');
+                    console.error('/transcription endpoint failed');
                 }
                 setTimeout(() => {
                     setIsTranscribingAnimate(false);
@@ -157,3 +152,8 @@ const LayoutContent = (): JSX.Element => {
 };
 
 export default LayoutContent;
+
+// TO DOWNLOAD .WAV BLOB //
+// const downloadRecordedBlob = (): void => {
+//     invokeSaveAsDialog(recordedAudioBlob as Blob);
+// };

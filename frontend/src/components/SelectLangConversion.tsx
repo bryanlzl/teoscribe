@@ -1,5 +1,5 @@
-import { ChangeEvent } from 'react';
 import { LanguageIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
+import { ChangeEvent } from 'react';
 import { TRANSLATION_LIBRARY } from '../definitions/conversionDict';
 import useLangConversion from '../stores/useLangConversion';
 

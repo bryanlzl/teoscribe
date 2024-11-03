@@ -1,13 +1,27 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
-from starlette.responses import JSONResponse
-from transformers import WhisperForConditionalGeneration, WhisperTokenizer, WhisperProcessor, AutomaticSpeechRecognitionPipeline
-from peft import PeftConfig, PeftModel
-from api.model.model import TranscribeAudioReqBody
+import logging
+import os
 
+import httpx
 import torch
 import torchaudio
-import logging
+from api.model.model import TranscribeAudioReqBody
+from dotenv import load_dotenv
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from google.cloud import translate_v2 as translate
+from peft import PeftConfig, PeftModel
+from starlette.responses import JSONResponse
+from transformers import (
+    AutomaticSpeechRecognitionPipeline,
+    WhisperForConditionalGeneration,
+    WhisperProcessor,
+    WhisperTokenizer,
+)
 
+# Env vars
+load_dotenv()
+
+# Google translate client
+GOOGLE_CLOUD_API_KEY = os.getenv("GOOGLE_CLOUD_TRANSLATE_API_KEY")
 
 router = APIRouter()
 
@@ -68,7 +82,8 @@ async def transcribe_audio(audio_blob: UploadFile = File(...), dialect: str = Fo
         logging.info("transcribe_request received" + audio_blob.content_type)
         logging.info("transcribe_request dialect:" + dialect)
         
-        static_text = "谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢"
+        #TODO: Replace with transcribed text
+        static_text = "谢谢什么" 
         return JSONResponse(
             status_code=200,
             content={
@@ -86,3 +101,57 @@ async def transcribe_audio(audio_blob: UploadFile = File(...), dialect: str = Fo
             }
         )
 
+# Translate Endpoint
+@router.post("/translate", summary="Translate text", description="Translates text from a specified source language into the specified target language")
+async def translate_text(
+    text: str = Form(...), 
+    source_language: str = Form(...), 
+    target_language: str = Form(...)
+):
+    """Translates the provided text from the specified source language to the target language."""
+    try:
+        url = "https://translation.googleapis.com/language/translate/v2"
+        params = {
+            "q": text,
+            "source": source_language,
+            "target": target_language,
+            "key": GOOGLE_CLOUD_API_KEY,
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, params=params)
+            response.raise_for_status()  # Raise an error for any non-200 responses
+            translation = response.json()
+
+        translated_text = translation['data']['translations'][0]['translatedText']
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "original_text": text,
+                "translated_text": translated_text,
+                "source_language": source_language,
+                "target_language": target_language
+            }
+        )
+    except httpx.HTTPStatusError as e:
+        logging.error(f"HTTP error during translation: {str(e)}")
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail={
+                "success": False,
+                "message": "Translation API request failed",
+                "error": str(e)
+            }
+        )
+    except Exception as e:
+        logging.error(f"Translation error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "message": "An unexpected error occurred during translation",
+                "error": str(e)
+            }
+        )

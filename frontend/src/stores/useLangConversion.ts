@@ -1,6 +1,6 @@
 import { create } from 'zustand';
+import { IConversionResults, ILangConversionSettings } from '../types/langConversionTypes';
 import { ILangConversionStore } from '../types/storeTypes';
-import { ILangConversionSettings, IConversionResults } from '../types/langConversionTypes';
 
 const useLangConversionStore = create<ILangConversionStore>((set) => ({
     conversionSettings: {

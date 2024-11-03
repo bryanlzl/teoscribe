@@ -1,9 +1,9 @@
 /* eslint-disable no-irregular-whitespace */
-import SlidingUpPanel from './SlideUpPanel';
-import useAppViewState from '../stores/useAppViewState';
 import AudioPlayer from 'react-h5-audio-player';
-import useTheme from '../stores/useTheme';
 import 'react-h5-audio-player/lib/styles.css';
+import useAppViewState from '../stores/useAppViewState';
+import useTheme from '../stores/useTheme';
+import SlidingUpPanel from './SlideUpPanel';
 import './styles/audioPlayerDarkStyles.css';
 
 const PlaybackPanel = () => {
@@ -25,6 +25,7 @@ const PlaybackPanel = () => {
             isStacked={appViewState.panels.playbackPanel.isStacked}
             isEnabled={appViewState.panels.playbackPanel.isOpen}
             setIsEnabled={disableSlidingPanel}
+            styles={{ zIndex: 20 }}
         >
             <div className="space-y-[1rem]">
                 <span className="flex flex-row justify-center items-center mx-6 w-max-content py-[0.3rem] px-[0.5rem] align-center border-t-[0.15rem] border-b-[0.15rem] border-accent space-x-1 text-xl">
