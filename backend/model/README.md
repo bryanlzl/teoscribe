@@ -3,6 +3,7 @@
 
 **We store our dataset in this format:**
 ```
+# labelled
 crawled/
     ├── audio/
     │   ├── audio1.wav
@@ -59,8 +60,9 @@ To split labelled crawled data,
 python split.py --data_path "/scratch/users/nus/e1329380/cs5647/crawled/dataset_processed.json" --train_path "/scratch/users/nus/e1329380/cs5647/crawled/train.json" --test_path "/scratch/users/nus/e1329380/cs5647/crawled/test.json"
 ```
 #### Finetune Whisper (teacher model)
-- Currently, I fixed the training hyperparameters.
+- Currently, training hyperparameters are fixed.
 - PEFT LoRA is used to fine-tune Whisper-small model.
+- We trained four different models to investigate the effects of audio cleaning and including semantics loss into model training: (1) audio not cleaned; (2) audio not cleaned + semantics; (3) audio cleaned; (4) audio cleaned + semantics.
 
 You can train either from Python:
 ``` python
@@ -86,4 +88,5 @@ from finetune import *
 predict("/scratch/users/nus/e1329380/cs5647/finetuned/checkpoint-440/", "/scratch/users/nus/e1329380/cs5647/testing/Money.wav", do_peft=True)
 # outputs the predicted transcription as text
 ```
+
 #### Self-training (teacher teaches student model)
