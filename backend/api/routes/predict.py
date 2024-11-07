@@ -1,24 +1,12 @@
-import asyncio
 import logging
 import os
 import tempfile
 
 import httpx
-import torch
-import torchaudio
-from api.model.model import TranscribeAudioReqBody
-from api.utils.audio_processing import predict_api
+from api.utils.audio_processing import load_pipeline, predict_api
 from dotenv import load_dotenv
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from google.cloud import translate_v2 as translate
-from peft import PeftConfig, PeftModel
 from starlette.responses import JSONResponse
-from transformers import (
-    AutomaticSpeechRecognitionPipeline,
-    WhisperForConditionalGeneration,
-    WhisperProcessor,
-    WhisperTokenizer,
-)
 
 # Env vars
 load_dotenv()
@@ -28,19 +16,7 @@ GOOGLE_CLOUD_API_KEY = os.getenv("GOOGLE_CLOUD_TRANSLATE_API_KEY")
 
 router = APIRouter()
 
-# Preload the pipeline
-def load_pipeline():
-    peft_path = "C:/Users/Bryan/Desktop/projects/teochew-learning-app/backend/model/model_semantics_clean"
-    peft_config = PeftConfig.from_pretrained(peft_path)
-    model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
-    model = PeftModel.from_pretrained(model, peft_path)
-    tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
-    processor = WhisperProcessor.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
-    pipeline = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=processor.feature_extractor)
-    return pipeline
-
 pipeline = load_pipeline()
-
 
 @router.get("/", summary="Server status check", description="Checks if the TeoSCRIBE backend transcription service is running")
 async def server_status():
