@@ -3,6 +3,8 @@ __pycache__
 wandb
 run*.sh
 run*.pbs
-backend/model/clean_model
-backend/model/clean_semantics_model
+backend/model/model_clean
+backend/model/model_no_clean_no_semantics
+backend/model/model_semantics
+backend/model/model_semantics_clean
 testaudio

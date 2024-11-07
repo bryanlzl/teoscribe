@@ -1,12 +1,19 @@
-from transformers import WhisperForConditionalGeneration, Seq2SeqTrainer, Seq2SeqTrainingArguments, AutomaticSpeechRecognitionPipeline, WhisperTokenizer
-from torch.utils.data import random_split
-from peft import LoraConfig, PeftConfig, PeftModel, LoraModel, get_peft_model
-import random, torch, wandb
-import numpy as np
-
-from functions import *
-
 import argparse
+import random
+
+import numpy as np
+import torch
+import wandb
+from functions import *
+from peft import LoraConfig, LoraModel, PeftConfig, PeftModel, get_peft_model
+from torch.utils.data import random_split
+from transformers import (
+    AutomaticSpeechRecognitionPipeline,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+    WhisperForConditionalGeneration,
+    WhisperTokenizer,
+)
 
 torch.manual_seed(2024)
 random.seed(2024)

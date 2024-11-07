@@ -33,6 +33,7 @@ const LayoutContent = (): JSX.Element => {
             mimeType: 'audio/wav',
             recorderType: RecordRTC.StereoAudioRecorder,
             desiredSampRate: 44100,
+            numberOfAudioChannels: 1,
         });
         audioRecorderRef.current.startRecording();
     };

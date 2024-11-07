@@ -1,10 +1,13 @@
+import asyncio
 import logging
 import os
+import tempfile
 
 import httpx
 import torch
 import torchaudio
 from api.model.model import TranscribeAudioReqBody
+from api.utils.audio_processing import predict_api
 from dotenv import load_dotenv
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from google.cloud import translate_v2 as translate
@@ -26,17 +29,17 @@ GOOGLE_CLOUD_API_KEY = os.getenv("GOOGLE_CLOUD_TRANSLATE_API_KEY")
 router = APIRouter()
 
 # Preload the pipeline
-# def load_pipeline():
-#     peft_path = "C:/Users/Bryan/Desktop/projects/teochew-learning-app/backend/model/clean_model"
-#     peft_config = PeftConfig.from_pretrained(peft_path)
-#     model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
-#     model = PeftModel.from_pretrained(model, peft_path)
-#     tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
-#     processor = WhisperProcessor.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
-#     pipeline = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=processor.feature_extractor)
-#     return pipeline
+def load_pipeline():
+    peft_path = "C:/Users/Bryan/Desktop/projects/teochew-learning-app/backend/model/model_semantics_clean"
+    peft_config = PeftConfig.from_pretrained(peft_path)
+    model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
+    model = PeftModel.from_pretrained(model, peft_path)
+    tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
+    processor = WhisperProcessor.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
+    pipeline = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=processor.feature_extractor)
+    return pipeline
 
-# pipeline = load_pipeline()
+pipeline = load_pipeline()
 
 
 @router.get("/", summary="Server status check", description="Checks if the TeoSCRIBE backend transcription service is running")
@@ -83,12 +86,19 @@ async def transcribe_audio(audio_blob: UploadFile = File(...), dialect: str = Fo
         logging.info("transcribe_request dialect:" + dialect)
         
         #TODO: Replace with transcribed text
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
+            temp_audio_file.write(await audio_blob.read())
+            temp_audio_file_path = temp_audio_file.name
+            print(temp_audio_file_path)
+            transcribed_text = predict_api(pipeline, temp_audio_file_path)
+            print("The transcribed text is:", transcribed_text)
+        
         static_text = "谢谢什么" 
         return JSONResponse(
             status_code=200,
             content={
                 "success": True,
-                "transcribed_text": static_text
+                "transcribed_text": transcribed_text
             }
         )
     except Exception as e:
