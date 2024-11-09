@@ -1,3 +1,4 @@
+import html
 import logging
 import os
 import tempfile
@@ -69,7 +70,7 @@ async def transcribe_audio(audio_blob: UploadFile = File(...), dialect: str = Fo
             transcribed_text = predict_api(pipeline, temp_audio_file_path)
             print("The transcribed text is:", transcribed_text)
         
-        static_text = "谢谢什么" 
+        # static_text = "谢谢什么" 
         return JSONResponse(
             status_code=200,
             content={
@@ -109,7 +110,7 @@ async def translate_text(
             response.raise_for_status()  # Raise an error for any non-200 responses
             translation = response.json()
 
-        translated_text = translation['data']['translations'][0]['translatedText']
+        translated_text = html.unescape(translation['data']['translations'][0]['translatedText'])
         
         return JSONResponse(
             status_code=200,

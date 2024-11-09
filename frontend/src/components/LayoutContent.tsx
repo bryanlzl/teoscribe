@@ -24,6 +24,19 @@ const LayoutContent = (): JSX.Element => {
     const audioRecorderRef = useRef<RecordRTC | null>(null);
     // --------- recordRTC end -----------//
 
+    // Display text for start/stop recording & transcribing text
+    const displayRecordingText = (): string => {
+        if (!isTranscribingAnimate) {
+            if (!isRecordingAnimate) {
+                return 'Tap to speak';
+            } else {
+                return 'Recording (tap to stop)';
+            }
+        } else {
+            return 'Transcribing, please wait...';
+        }
+    };
+
     // RECORDRTC METHODS: To start/stop/get recorded audio in .wav (PCM codec)
     const startAudioRecording = async (): Promise<void> => {
         const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -100,6 +113,7 @@ const LayoutContent = (): JSX.Element => {
             },
         });
     };
+
     // Trigger transcription backend call
     useEffect(() => {
         if ((recordedAudioBlob as Blob) !== null) {
@@ -108,6 +122,7 @@ const LayoutContent = (): JSX.Element => {
             setIsTranscribingAnimate(true);
         }
     }, [recordedAudioBlob]);
+
     // Trigger after receiving response from /transcribe endpoint
     useEffect(() => {
         if (!awaitResponse && (responseData !== null || error !== null)) {
@@ -131,7 +146,7 @@ const LayoutContent = (): JSX.Element => {
         <div className="flex flex-col justify-center items-center w-[100%] h-[100%]">
             <SelectLangConversion />
             <div className="flex flex-col justify-center items-center w-fit h-[100%] space-y-[1.5rem]">
-                <h2 className="text-center opacity-75">Tap to speak</h2>
+                <h2 className="text-center opacity-75">{displayRecordingText()}</h2>
                 <button className="btn btn-circle w-[15.5rem] h-[15.5rem] bg-primary" onClick={toggleRecording}>
                     {isRecordingAnimate ? (
                         <span className="loading loading-ring w-[85%]" />

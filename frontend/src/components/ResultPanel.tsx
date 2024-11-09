@@ -1,4 +1,4 @@
-import { ClipboardDocumentIcon, PlayIcon } from '@heroicons/react/24/solid';
+import { ClipboardDocumentIcon } from '@heroicons/react/24/solid';
 import { useEffect, useRef, useState } from 'react';
 
 import { LANGUAGE_CODE_DICT } from '../definitions/conversionDict';
@@ -77,25 +77,25 @@ const ResultPanel = () => {
         });
     };
     // ZUSTAND METHOD: open/slides up playback panel
-    const openPlaybackPanel = (): void => {
-        setAppViewState({
-            ...appViewState,
-            panels: {
-                ...appViewState.panels,
-                playbackPanel: { ...appViewState.panels.playbackPanel, isOpen: true },
-            },
-        });
-        setTimeout(() => {
-            setAppViewState({
-                ...appViewState,
-                panels: {
-                    ...appViewState.panels,
-                    resultPanel: { ...appViewState.panels.resultPanel, isStacked: true },
-                    playbackPanel: { ...appViewState.panels.playbackPanel, isOpen: true },
-                },
-            });
-        }, 500);
-    };
+    // const openPlaybackPanel = (): void => {
+    //     setAppViewState({
+    //         ...appViewState,
+    //         panels: {
+    //             ...appViewState.panels,
+    //             playbackPanel: { ...appViewState.panels.playbackPanel, isOpen: true },
+    //         },
+    //     });
+    //     setTimeout(() => {
+    //         setAppViewState({
+    //             ...appViewState,
+    //             panels: {
+    //                 ...appViewState.panels,
+    //                 resultPanel: { ...appViewState.panels.resultPanel, isStacked: true },
+    //                 playbackPanel: { ...appViewState.panels.playbackPanel, isOpen: true },
+    //             },
+    //         });
+    //     }, 500);
+    // };
 
     // Trigger initial translation endpoint call upon result panel load
     useEffect(() => {
@@ -190,13 +190,13 @@ const ResultPanel = () => {
                             />
                         </div>
                     </div>
-                    <button
+                    {/* <button
                         className="btn btn-xs mx-3 h-[2rem] w-max-content flex flex-row justify-center items-center bg-primary hover:bg-neutral border-none rounded-md text-center opacity-90"
                         onClick={openPlaybackPanel}
                     >
                         <PlayIcon className="h-[1.4rem] text-font" />
                         <p className="font-bold w-fit text-[0.95rem] text-font">Play Subtitled Recording</p>
-                    </button>
+                    </button> */}
                 </div>
                 {/* Translated English results */}
                 <div className="card mx-3 bg-secondary bg-opacity-75 rounded-sm">
@@ -233,7 +233,7 @@ const ResultPanel = () => {
                         >
                             <textarea
                                 readOnly
-                                style={{ height: 'calc(51vh - 15rem)' }}
+                                style={{ height: 'calc(51vh - 13rem)' }}
                                 className={`textarea w-[100%] rounded-md text-lg resize-none ${
                                     theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                 } `}
