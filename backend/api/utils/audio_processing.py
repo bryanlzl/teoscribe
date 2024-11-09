@@ -19,7 +19,7 @@ forced_decoder_ids = [[0, mandarin_token_id]]
 
 # Preload pipelines
 def load_semantics_pipeline():
-    peft_path = "C:/Users/Bryan/Desktop/projects/teochew-learning-app/backend/model/model_semantics_clean"
+    peft_path = os.path.join(os.path.dirname(__file__),"..", "..", "model", "model_semantics_clean")
     peft_config = PeftConfig.from_pretrained(peft_path)
     model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
     model = PeftModel.from_pretrained(model, peft_path)
@@ -29,7 +29,7 @@ def load_semantics_pipeline():
     return pipeline
 
 def load_pipeline():
-    peft_path = "C:/Users/Bryan/Desktop/projects/teochew-learning-app/backend/model/model_clean"
+    peft_path = os.path.join(os.path.dirname(__file__),"..", "..", "model", "model_clean")
     peft_config = PeftConfig.from_pretrained(peft_path)
     model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
     model = PeftModel.from_pretrained(model, peft_path)
