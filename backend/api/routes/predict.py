@@ -13,14 +13,14 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from starlette.responses import JSONResponse
 
-# Env vars
 load_dotenv()
 
-# Google translate client
+# load google api envs
 GOOGLE_CLOUD_API_KEY = os.getenv("GOOGLE_CLOUD_TRANSLATE_API_KEY")
 
 router = APIRouter()
 
+# preload both model pipelines
 pipeline = load_pipeline()
 semantics_pipeline = load_semantics_pipeline()
 
@@ -31,7 +31,6 @@ async def server_status():
     """
     try:
         is_server_operational = True
-
         if is_server_operational:
             return JSONResponse(
                 status_code=200,

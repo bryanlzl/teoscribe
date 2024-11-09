@@ -5,6 +5,7 @@ import os
 import torch
 import torchaudio
 import torchaudio.transforms as T
+from dotenv import load_dotenv
 from peft import PeftConfig, PeftModel
 from transformers import (
     AutomaticSpeechRecognitionPipeline,
@@ -13,26 +14,46 @@ from transformers import (
     WhisperTokenizer,
 )
 
+load_dotenv()
+
+# load hugging face and model repo envs
+hugging_face_api_token = os.getenv("HUGGING_FACE_API_KEY")
+semantics_model_repo = os.getenv("SEMANTICS_MODEL_REPO")
+clean_model_repo = os.getenv("CLEAN_MODEL_REPO")
+
+# set whisper tokenizer and language configs
 tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-small")
 mandarin_token_id = tokenizer.convert_tokens_to_ids("<|zh|>")
 forced_decoder_ids = [[0, mandarin_token_id]]
 
 # Preload pipelines
 def load_semantics_pipeline():
-    peft_path = os.path.join(os.path.dirname(__file__),"..", "..", "model", "model_semantics_clean")
-    peft_config = PeftConfig.from_pretrained(peft_path)
-    model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
-    model = PeftModel.from_pretrained(model, peft_path)
+    # peft_path = os.path.join(os.path.dirname(__file__),"..", "..", "model", "model_semantics_clean")
+    # peft_config = PeftConfig.from_pretrained(peft_path)
+    # model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
+    # model = PeftModel.from_pretrained(model, peft_path)
+    
+    model = WhisperForConditionalGeneration.from_pretrained(
+        clean_model_repo,
+        token=hugging_face_api_token,
+        device_map="auto"
+    )
     tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
     processor = WhisperProcessor.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
     pipeline = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=processor.feature_extractor)
     return pipeline
 
 def load_pipeline():
-    peft_path = os.path.join(os.path.dirname(__file__),"..", "..", "model", "model_clean")
-    peft_config = PeftConfig.from_pretrained(peft_path)
-    model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
-    model = PeftModel.from_pretrained(model, peft_path)
+    # peft_path = os.path.join(os.path.dirname(__file__),"..", "..", "model", "model_clean")
+    # peft_config = PeftConfig.from_pretrained(peft_path)
+    # model = WhisperForConditionalGeneration.from_pretrained(peft_config.base_model_name_or_path, device_map="auto")
+    # model = PeftModel.from_pretrained(model, peft_path)
+    
+    model = WhisperForConditionalGeneration.from_pretrained(
+        clean_model_repo,
+        token=hugging_face_api_token,
+        device_map="auto"
+    )
     tokenizer = WhisperTokenizer.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
     processor = WhisperProcessor.from_pretrained("openai/whisper-small", language="zh", task="transcribe")
     pipeline = AutomaticSpeechRecognitionPipeline(model=model, tokenizer=tokenizer, feature_extractor=processor.feature_extractor)
