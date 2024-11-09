@@ -1,5 +1,5 @@
 import { ArrowDownIcon } from '@heroicons/react/24/outline';
-import React, { Dispatch, FC, SetStateAction, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useState } from 'react';
 import useAppViewState from '../stores/useAppViewState';
 
 interface ISlidingUpPanelProps {
