@@ -1,11 +1,13 @@
-from .predict import router as predict_router
+import os
+
 import uvicorn
 from fastapi import FastAPI
-import os
+
+from .predict import router as predict_router
 
 app = FastAPI()
 
-host = os.getenv("HOST", "127.0.0.1")  
+host = os.getenv("HOST", "0.0.0.0")  
 port = int(os.getenv("PORT", 8000))
 
 if __name__ == "__main__":
