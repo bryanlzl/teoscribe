@@ -9,6 +9,7 @@ const useLangConversionStore = create<ILangConversionStore>((set) => ({
         targetLanguage: 'Chinese',
         inputFormat: 'audio',
         outputFormat: 'text',
+        model: 'standard',
     },
     setConversionSettings: (conversionSettings: ILangConversionSettings) => set({ conversionSettings }),
     conversionResults: {

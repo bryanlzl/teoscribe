@@ -4,7 +4,11 @@ import os
 import tempfile
 
 import httpx
-from api.utils.audio_processing import load_pipeline, predict_api
+from api.utils.audio_processing import (
+    load_pipeline,
+    load_semantics_pipeline,
+    predict_api,
+)
 from dotenv import load_dotenv
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from starlette.responses import JSONResponse
@@ -18,6 +22,7 @@ GOOGLE_CLOUD_API_KEY = os.getenv("GOOGLE_CLOUD_TRANSLATE_API_KEY")
 router = APIRouter()
 
 pipeline = load_pipeline()
+semantics_pipeline = load_semantics_pipeline()
 
 @router.get("/", summary="Server status check", description="Checks if the TeoSCRIBE backend transcription service is running")
 async def server_status():
@@ -54,7 +59,7 @@ async def server_status():
         )
 
 @router.post("/transcribe", summary="Transcribes an audio input", description="Transcribe an audio input (using the model) into its character/text form")
-async def transcribe_audio(audio_blob: UploadFile = File(...), dialect: str = Form(...)):
+async def transcribe_audio(model: str = Form(...), audio_blob: UploadFile = File(...), dialect: str = Form(...)):
     """    
     Returns a string of transcribed characters/text based on an audio input
     """
@@ -66,9 +71,10 @@ async def transcribe_audio(audio_blob: UploadFile = File(...), dialect: str = Fo
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
             temp_audio_file.write(await audio_blob.read())
             temp_audio_file_path = temp_audio_file.name
-            print(temp_audio_file_path)
-            transcribed_text = predict_api(pipeline, temp_audio_file_path)
-            print("The transcribed text is:", transcribed_text)
+            logging.debug(temp_audio_file_path)
+            pipeline_used = pipeline if model == "standard" else semantics_pipeline
+            transcribed_text = predict_api(pipeline_used, temp_audio_file_path)
+            logging.debug("The transcribed text is:", transcribed_text)
         
         # static_text = "谢谢什么" 
         return JSONResponse(

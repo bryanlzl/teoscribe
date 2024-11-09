@@ -4,6 +4,7 @@ export interface ILangConversionSettings {
     targetLanguage: string;
     inputFormat: string;
     outputFormat: string;
+    model: string;
 }
 
 export interface IConversionResults {

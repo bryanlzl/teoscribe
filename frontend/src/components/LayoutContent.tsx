@@ -12,7 +12,7 @@ import RecordRTC from 'recordrtc';
 
 const LayoutContent = (): JSX.Element => {
     const { appViewState, setAppViewState } = useAppViewState();
-    const { setConversionResults } = useLangConversion();
+    const { conversionSettings, setConversionResults } = useLangConversion();
     const { sendRequest, awaitResponse, responseData, error } = useAxios<ITranscriptionResponse>();
 
     const [isRecordingAnimate, setIsRecordingAnimate] = useState<boolean>(false);
@@ -71,6 +71,7 @@ const LayoutContent = (): JSX.Element => {
     // ENDPOINT CALL: Send .wav audio blob to backend for transcription
     const sendForTranscription = (): void => {
         const formData = new FormData();
+        formData.append('model', conversionSettings.model);
         formData.append('dialect', 'teochew');
         formData.append('audio_blob', recordedAudioBlob as Blob, 'audio.wav');
 

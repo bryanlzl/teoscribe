@@ -15,7 +15,7 @@ const SelectLangConversion = (): JSX.Element => {
     };
 
     return (
-        <div className="flex flex-col mt-[8vh] space-y-[1rem]">
+        <div className="flex flex-col mt-[12vh] space-y-[1rem]">
             {/* Source Language Selection */}
             <span className="flex flex-row items-center space-x-[0.75rem]">
                 <MicrophoneIcon className="h-[1.2rem] w-auto text-base-content" />
