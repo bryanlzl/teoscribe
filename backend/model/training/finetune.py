@@ -126,9 +126,6 @@ def train(audio_path, train_path, test_path, out_path, do_wandb, clean_audio, se
     model.config.use_cache = False  # silence the warnings, reanable for inference
     trainer.train()
 
-def evaluation():
-    return
-
 def predict(peft_path, audio_path, do_peft):
     language = "zh"
     task = "transcribe"
