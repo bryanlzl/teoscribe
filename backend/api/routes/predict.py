@@ -18,13 +18,13 @@ load_dotenv()
 # load google api envs
 GOOGLE_CLOUD_API_KEY = os.getenv("GOOGLE_CLOUD_TRANSLATE_API_KEY")
 
-router = APIRouter()
+predict_router = APIRouter()
 
 # preload both model pipelines
 pipeline = load_pipeline()
 semantics_pipeline = load_semantics_pipeline()
 
-@router.get("/", summary="Server status check", description="Checks if the TeoSCRIBE backend transcription service is running")
+@predict_router.get("/", summary="Server status check", description="Checks if the TeoSCRIBE backend transcription service is running")
 async def server_status():
     """    
     Returns a response to confirm that the TeoSCRIBE backend transcription service is running.
@@ -57,7 +57,7 @@ async def server_status():
             }
         )
 
-@router.post("/transcribe", summary="Transcribes an audio input", description="Transcribe an audio input (using the model) into its character/text form")
+@predict_router.post("/transcribe", summary="Transcribes an audio input", description="Transcribe an audio input (using the model) into its character/text form")
 async def transcribe_audio(model: str = Form(...), audio_blob: UploadFile = File(...), dialect: str = Form(...)):
     """    
     Returns a string of transcribed characters/text based on an audio input
@@ -94,7 +94,7 @@ async def transcribe_audio(model: str = Form(...), audio_blob: UploadFile = File
         )
 
 # Translate Endpoint
-@router.post("/translate", summary="Translate text", description="Translates text from a specified source language into the specified target language")
+@predict_router.post("/translate", summary="Translate text", description="Translates text from a specified source language into the specified target language")
 async def translate_text(
     text: str = Form(...), 
     source_language: str = Form(...), 
