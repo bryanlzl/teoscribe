@@ -3,6 +3,7 @@ __pycache__
 wandb
 run*.sh
 run*.pbs
+backend/start_server.ps1
 backend/model/model_clean
 backend/model/model_no_clean_no_semantics
 backend/model/model_semantics
