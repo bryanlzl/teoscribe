@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useCallback, useState } from 'react';
-import { API_BASE_URL, API_PORT } from '../config/env';
+import { API_BASE_URL } from '../config/env';
 
 type TUseAxiosReturn<T> = {
     sendRequest: (config: AxiosRequestConfig) => Promise<void>;
@@ -14,8 +14,8 @@ const useAxios = <T>(): TUseAxiosReturn<T> => {
     const [error, setError] = useState<string | null>(null);
     const [responseData, setResponseData] = useState<T | null>(null);
 
-    const baseConfig: AxiosRequestConfig = { url: API_BASE_URL + ':' + API_PORT };
-    // const baseConfig: AxiosRequestConfig = { url: API_BASE_URL };
+    // const baseConfig: AxiosRequestConfig = { url: API_BASE_URL + ':' + API_PORT };
+    const baseConfig: AxiosRequestConfig = { url: API_BASE_URL };
 
     const sendRequest = useCallback(
         async (config: AxiosRequestConfig): Promise<void> => {
