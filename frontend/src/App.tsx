@@ -21,7 +21,7 @@ const App = (): JSX.Element => {
     return (
         <div
             data-theme={theme}
-            className="relative flex flex-col justify-center items-center h-[100vh] bg-base-100 text-base-content"
+            className="relative flex flex-col justify-center items-center h-[100svh] bg-base-100 text-base-content"
         >
             <LayoutHeader />
             <LayoutContent />

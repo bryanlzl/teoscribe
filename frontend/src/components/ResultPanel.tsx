@@ -179,7 +179,7 @@ const ResultPanel = () => {
                         >
                             <textarea
                                 readOnly
-                                style={{ height: 'calc(55vh - 15rem)' }}
+                                style={{ height: 'calc(55svh - 15rem)' }}
                                 className={`textarea py-[0.25rem] w-[100%] text-lg resize-none ${
                                     theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                 }`}
@@ -233,7 +233,7 @@ const ResultPanel = () => {
                         >
                             <textarea
                                 readOnly
-                                style={{ height: 'calc(51vh - 13rem)' }}
+                                style={{ height: 'calc(51svh - 13rem)' }}
                                 className={`textarea w-[100%] rounded-md text-lg resize-none ${
                                     theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                 } `}

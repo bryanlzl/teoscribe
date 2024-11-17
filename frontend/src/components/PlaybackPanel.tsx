@@ -36,7 +36,7 @@ const PlaybackPanel = () => {
                     <div className="relative card-body px-3 py-1">
                         <div className="flex flex-col items-center justify-center space-y-[2rem]">
                             <div
-                                style={{ height: 'calc(85vh - 18rem)' }}
+                                style={{ height: 'calc(85svh - 18rem)' }}
                                 className={`py-[0.25rem] w-[100%] text-lg ${
                                     theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
                                 } overflow-y-auto`}
@@ -58,7 +58,7 @@ const PlaybackPanel = () => {
 
                             {/* <textarea
                 readOnly
-                style={{ height: 'calc(85vh - 18rem)' }}
+                style={{ height: 'calc(85svh - 18rem)' }}
                 className={`textarea py-[0.25rem] w-[100%] text-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}
                 defaultValue="谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么
                   谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢谢什么谢

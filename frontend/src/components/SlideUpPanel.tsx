@@ -53,7 +53,7 @@ const SlidingUpPanel: FC<ISlidingUpPanelProps> = ({
     return (
         <div
             style={{
-                height: isEnabled ? `calc(100vh - ${offsetHeight}rem)` : '0',
+                height: isEnabled ? `calc(100svh - ${offsetHeight}rem)` : '0',
                 boxShadow: '0 -0.5rem 1rem rgba(0, 0, 0, 0.15)',
                 ...styles,
             }}
