@@ -28,12 +28,12 @@ const LayoutContent = (): JSX.Element => {
     const displayRecordingText = (): string => {
         if (!isTranscribingAnimate) {
             if (!isRecordingAnimate) {
-                return 'Tap to speak';
+                return 'Tap to speak ' + conversionSettings.sourceLanguage.toLowerCase();
             } else {
                 return 'Recording (tap to stop)';
             }
         } else {
-            return 'Transcribing, please wait...';
+            return 'Transcribing to ' + conversionSettings.targetLanguage.toLowerCase() + '...';
         }
     };
 
