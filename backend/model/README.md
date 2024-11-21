@@ -90,3 +90,9 @@ predict("/scratch/users/nus/e1329380/cs5647/finetuned/checkpoint-440/", "/scratc
 ```
 
 #### Self-training (teacher teaches student model)
+- We trained four student models corresponding to the four teacher models: (1) audio not cleaned; (2) audio not cleaned + semantics; (3) audio cleaned; (4) audio cleaned + semantics.
+
+For self-training, 
+1. Use new_predict.py to get predictions from teacher model and combine with original training data.
+2. Train student model with the same finetune.py using training data.
+3. For multiple rounds, repeat.
