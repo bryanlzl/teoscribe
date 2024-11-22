@@ -38,7 +38,9 @@ crawled/
 ]
 ```
 
-**We provide the crawled data in:**
+**We provide the crawled annotated data in (audio files not provided, requires crawling):** data folder
+- "train.json" after splitting, labeled for training
+- "test.json" after splitting, labeled for testing (eval)
 
 #### Techniques used to clean/crawl for the data:
 - VAD: silero_vad (segment audio)
@@ -47,7 +49,7 @@ crawled/
 - Noise removal: noisereduce
 - Image enhancement: increased contrast
 
-#### Prepare Data
+#### Prepare Data (still required to extract audio from the videos)
 To crawl,
 ```
 # --audio_only, if crawling for audio only (no subtitle)
