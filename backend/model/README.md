@@ -118,3 +118,26 @@ To filter by confidence score,
 
 #### The predictions and confidence scores from the final trained teacher and student models can be found in:
 - https://nusu.sharepoint.com/:f:/s/SoundMusicComputing/EsLzI22cb_BKs7I1mOblcyMBT5bayVRe0oHUXbJmVntraw
+```
+# test_base_pred.json
+[
+    {
+        "audio_file": "20181106_Teochew Movie - Unwelcomed Mother (潮州电影 - 潮汕生功不如养功大).wav",
+        "cleaned_audio_file": "cleaned_20181106_Teochew Movie - Unwelcomed Mother (潮州电影 - 潮汕生功不如养功大).wav",
+        "timestamp_start": 15060512,
+        "timestamp_end": 15097312,
+        "subtitle": "人无根由必有养喱",
+        "joint_confidence_score": 0.0008215336707951679,
+        "average_confidence_score": 0.6225725154985081
+    },
+    {
+        "audio_file": "20181104_Teochew Movie - Smart Wife 2⧸3 (潮州电影 - 傻仔婿与巧媳妇 02⧸03).wav",
+        "cleaned_audio_file": "cleaned_20181104_Teochew Movie - Smart Wife 2⧸3 (潮州电影 - 傻仔婿与巧媳妇 02⧸03).wav",
+        "timestamp_start": 79975968,
+        "timestamp_end": 80005088,
+        "subtitle": "反射不断",
+        "joint_confidence_score": 0.001122207993005975,
+        "average_confidence_score": 0.5088582411408424
+    }, ...
+]
+```
