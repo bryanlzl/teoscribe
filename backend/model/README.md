@@ -1,7 +1,9 @@
 ## 1) Crawl Teochew videos
-**We downloaded a whole bunch of cropped Teochew videos at:** https://drive.google.com/drive/folders/1D_LhdBszNeJllwSA4Y1OnY2oLTcEvt2G
+**We downloaded a whole bunch of cropped Teochew videos at:**
+- https://drive.google.com/drive/folders/1_8eIdWAQqVUa14RSuhyGYsi8WOjam7nE?usp=sharing (labeled)
+- https://drive.google.com/drive/folders/1W9UViBxl6CXS_W8q6DNbTlu9ONW2PR97?usp=sharing (unlabeled)
 
-**We store our dataset in this format:**
+**After crawling, we store our dataset in this format:**
 ```
 # labelled
 crawled/
@@ -35,6 +37,8 @@ crawled/
   }
 ]
 ```
+
+**We provide the crawled data in:**
 
 #### Techniques used to clean/crawl for the data:
 - VAD: silero_vad (segment audio)
