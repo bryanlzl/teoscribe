@@ -60,6 +60,7 @@ python postprocess.py --input_json "/scratch/users/nus/e1329380/cs5647/crawled/d
 - https://nusu.sharepoint.com/:f:/s/SoundMusicComputing/EjRVX9FzMn9Ck_zyaSPZyl8BkxMicbFPhUGnqREMmiy9wg?e=6wfWut
 - "train.json" after splitting, labeled for training teacher model
 - "test.json" after splitting, labeled for testing (eval)
+- Student model training files can be found in the "students" folder (the same "test.json" was used for evaluation)
 
 ## 2) Model Training
 To split labelled crawled data,
@@ -114,3 +115,6 @@ To filter by confidence score,
 
 #### We provide the final trained teacher and student models:
 - https://nusu.sharepoint.com/:f:/s/SoundMusicComputing/Egd7unI1XXBIouDNVuzzZrYB9TlC_GKSSoO0HYdJycBLJw?e=lDnGEe
+
+#### The predictions and confidence scores from the final trained teacher and student models can be found in:
+- https://nusu.sharepoint.com/:f:/s/SoundMusicComputing/EsLzI22cb_BKs7I1mOblcyMBT5bayVRe0oHUXbJmVntraw
