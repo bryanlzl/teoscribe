@@ -39,7 +39,7 @@ crawled/
 ```
 
 **We provide the crawled annotated data in (audio files not provided, requires crawling):** data folder
-- "train.json" after splitting, labeled for training
+- "train.json" after splitting, labeled for training teacher model
 - "test.json" after splitting, labeled for testing (eval)
 
 #### Techniques used to clean/crawl for the data:
