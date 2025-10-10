@@ -59,3 +59,18 @@ It is designed to preserve the Teochew dialect, a largely oral language without 
 cd frontend
 npm install
 npm run dev
+```
+- Strictly adhere to the required Python version (3.9.13) to avoid compatibility issues.
+- Make sure to install all dependencies for both the backend and frontend before running the application.
+
+### Contributors
+
+| Name                     | GitHub                                       | Contributions                                                    |
+| ------------------------ | -------------------------------------------- | ---------------------------------------------------------------- |
+| **Tan Yee Ying**         | [@tyeeying](https://github.com/tyeeying)     | Model training, ML training pipeline, data annotation            |
+| **Chen Ningjia**         | [@caydencnj](https://github.com/caydencnj)   | Model training, teacher–student model development, model tuning  |
+| **Lee XinYee**           | [@xinyee2801](https://github.com/xinyee2801) | Data crawling, cleaning, annotation, labelling                   |
+| **Lim Zhen Lun Bryan**   | [@bryanlzl](https://github.com/bryanlzl)     | End-to-end implementation of the application                     |
+
+---
+
