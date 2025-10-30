@@ -1,6 +1,6 @@
 import { LanguageIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
 import { ChangeEvent } from 'react';
-import { TRANSLATION_LIBRARY } from '../definitions/conversionDict';
+import { TRANSLATION_LIBRARY } from '../config/conversionDict';
 import useLangConversion from '../stores/useLangConversion';
 
 const SelectLangConversion = (): JSX.Element => {

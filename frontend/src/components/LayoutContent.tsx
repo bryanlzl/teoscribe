@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { ITranscriptionResponse } from '../definitions/endpoints';
+import { ITranscriptionResponse } from '../config/endpoints';
 import useAxios from '../hooks/useAxios';
 import useAppViewState from '../stores/useAppViewState';
 import useLangConversion from '../stores/useLangConversion';

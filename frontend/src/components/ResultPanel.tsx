@@ -1,8 +1,8 @@
 import { ClipboardDocumentIcon } from '@heroicons/react/24/solid';
 import { useEffect, useRef, useState } from 'react';
 
-import { LANGUAGE_CODE_DICT } from '../definitions/conversionDict';
-import { ITranslationResponse } from '../definitions/endpoints';
+import { LANGUAGE_CODE_DICT } from '../config/conversionDict';
+import { ITranslationResponse } from '../config/endpoints';
 import useAxios from '../hooks/useAxios';
 import useAppViewState from '../stores/useAppViewState';
 import useLangConversion from '../stores/useLangConversion';
